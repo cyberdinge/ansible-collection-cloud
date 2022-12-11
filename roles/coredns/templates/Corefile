@@ -33,3 +33,5 @@
 
 }
 {% endfor %}
+
+{{ coredns_corefile_extras }}

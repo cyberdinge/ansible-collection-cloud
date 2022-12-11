@@ -65,4 +65,14 @@ coredns_zones:
           n     IN CNAME www
       - description: host group 'inventory_group'
         group: inventory_group
-      
+
+# the content will be added to the Corefile
+
+# example of forwarding requests to one or more upstreams    
+    # coredns_corefile_extras: |
+    #   . {
+    #     log
+    #     errors
+    #     forward . 8.8.8.8 9.9.9.9
+    #   }
+coredns_corefile_extras: "# coredns_corefile_extras, empty per default"
