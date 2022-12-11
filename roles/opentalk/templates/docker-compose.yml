@@ -1,0 +1,31 @@
+---
+version: "3"
+services:
+  opentalk:
+    image: traefik/whoami:latest
+    restart: always
+    volumes:
+      - "{{ installdir }}/data:/data:rw"
+
+    labels:
+      - traefik.enable=true
+      - traefik.http.routers.opentalk.rule=Host(`{{ inventory_hostname }}.{{ project_domain }}`)
+      - traefik.http.routers.opentalk.entrypoints=web
+      - traefik.http.routers.opentalk.service=opentalk
+      - traefik.http.routers.opentalks.rule=Host(`{{ inventory_hostname }}.{{ project_domain }}`)
+      - traefik.http.routers.opentalks.entrypoints=websecure
+      - traefik.http.routers.opentalks.service=opentalk
+      - traefik.http.routers.opentalks.tls=true
+      - traefik.http.routers.opentalks.tls.certresolver=letsencrypt
+      - traefik.http.services.opentalk.loadbalancer.server.port=80
+    networks:
+      - {{ traefik_providers_docker_network }}
+    hostname: "opentalk.{{ inventory_hostname }}"
+    logging:
+      driver: syslog
+      options:
+        tag: "opentalk"
+networks:
+  # network in dem traefik ist, damit dieser hier hin routen kann
+  {{ traefik_providers_docker_network }}:
+    external: true

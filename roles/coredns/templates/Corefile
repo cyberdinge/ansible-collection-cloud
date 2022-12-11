@@ -1,0 +1,35 @@
+{% for zone in coredns_zones %}
+
+{{ zone.name }}. {
+    prometheus :9153
+    log
+    errors
+    reload 60s
+    health :8080
+
+    # https://coredns.io/plugins/loadbalance/
+    # The loadbalance will act as a round-robin DNS load balancer by randomizing the order of A, AAAA, and MX records in the answer.
+    loadbalance round_robin
+
+    # https://coredns.io/plugins/any/
+    # any basically blocks ANY queries by responding to them with a short HINFO reply. See RFC 8482 for details.
+    any
+
+    # If you wish to use a standard ZONE File format, uncomment the following line and customize the specified file
+    file /etc/coredns/{{ zone.name }}.txt {
+        reload 60s
+    }
+
+    template IN A myip.{{ zone.name }} {
+{% raw %}        answer "{{ .Name }} 1 IN A {{ .Remote }}"
+{% endraw %}
+    }
+
+    template IN TXT myip.{{ zone.name }} {
+{% raw %}        answer "{{ .Name }}   1 IN TXT  \"your ip: {{ .Remote }}\""
+{% endraw %}
+    }
+
+
+}
+{% endfor %}

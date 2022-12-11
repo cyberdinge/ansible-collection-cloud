@@ -1,0 +1,7 @@
+# promtail
+
+- when: promtail_state == "present"
+  include_tasks: up.yml
+
+- when: promtail_state != "present"
+  include_tasks: down.yml

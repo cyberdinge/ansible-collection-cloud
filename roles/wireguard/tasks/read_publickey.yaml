@@ -1,0 +1,21 @@
+---
+
+#
+# read the keys from a host will fail when a host requests keys from a peer that is not provisioned already
+# when this happen, we must ignore the error
+
+- name: Read publickey from peer "{{ item }}"
+  delegate_to: "{{ item }}"
+  delegate_facts: true
+  ignore_errors: true 
+  ignore_unreachable: true
+  ansible.builtin.shell: "cat /etc/wireguard/{{ wireguard_network_name }}_key.pub"
+  register: publickey
+
+- name: Setting wireguard_public_key of peer "{{ item }}"
+  delegate_to: "{{ item }}"
+  delegate_facts: true
+  ignore_errors: true 
+  ignore_unreachable: true
+  ansible.builtin.set_fact: 
+    wireguard_public_key: "{{ publickey.stdout }}"

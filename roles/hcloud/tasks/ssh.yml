@@ -1,0 +1,7 @@
+- name: import ssh keys to project
+  with_items: "{{ users }}"
+  hetzner.hcloud.hcloud_ssh_key:
+    api_token: "{{ api_token }}"
+    name: "{{ item.name }}"
+    public_key: "{{ item.key }}"
+    state: "{{ item.state }}"

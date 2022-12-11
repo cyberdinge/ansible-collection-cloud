@@ -1,0 +1,19 @@
+installdir: /dockerstacks/keycloak
+docker_image: quay.io/keycloak/keycloak:20.0.1
+traefik_providers_docker_network: traefik_proxy
+keycloak_domain: accounts.example.com 
+keycloak_domain_admin: accounts.example.com 
+keycloak_frontend_url: "https://{{ keycloak_domain }}"
+
+# innerhalb des containers
+keycloak_https_protocols: TLSv1.3,TLSv1.2
+keycloak_https_port: 8443
+
+keycloak_loglevel: debug
+
+# initial password when admin not exists
+keycloak_admin_username: admin
+keycloak_admin_password: ybwnaky5Ems9d8fnm8u79m8§$%EdtXFxW7WgnJ
+
+# not really used since tls is terminated by traefik infront
+keycloak_certificate_subject: "/C=DE/ST=Cyberraum/L=Hamburg/O=cyberdinge/CN={{ inventory_hostname }}"

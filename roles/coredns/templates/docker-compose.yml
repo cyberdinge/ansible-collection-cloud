@@ -1,0 +1,22 @@
+---
+version: "3"
+services:
+  {{ service_name }}:
+    image: "{{ docker_image_name }}:{{ docker_image_version }}"
+    restart: always
+    command: -conf /etc/coredns/Corefile
+    volumes:
+      - "${PWD}:/etc/coredns:ro"
+    ports:
+      - "{{ bindip_udp }}:{{ bindport_udp }}:53/udp"
+      - "{{ bindip_tcp }}:{{ bindport_tcp }}:53/tcp"
+      - "{{ bindip_metrics }}:{{ bindport_metrics }}:9153/tcp"
+    labels:
+      io.prometheus.metrics.ip: "{{ bindip_metrics }}"
+      io.prometheus.metrics.port: "{{ bindport_metrics }}"
+      io.prometheus.metrics.path: "/metrics"
+    hostname: "{{ service_name }}.{{ inventory_hostname }}"
+    logging:
+      driver: syslog
+      options:
+        tag: "{{ service_name }}"

@@ -1,0 +1,26 @@
+---
+# tasks file for cyberdinge.gnomedesktop
+- name: Install Gnome via apt
+  apt:
+    state: latest
+    name:
+      - task-gnome-desktop
+
+- name: "Get current systemd default"
+  command: "systemctl list-units --type target --state active"
+  changed_when: false
+  register: systemdefault
+
+- name: "Set default to graphical target"
+  when: "'graphical' not in systemdefault.stdout"
+  command: "systemctl set-default graphical.target"
+
+- name: reboot the server (when default target was changed)
+  when: "'graphical' not in systemdefault.stdout"
+  reboot:
+
+- name: set current runlevel to 5 (runlevel5.target, graphical.target)
+  command: "init 5"
+  changed_when: false
+
+# TODO - include_tasks: xrdp.yml

@@ -1,0 +1,43 @@
+---
+# tasks file for cyberdinge.linux
+
+- name: update all
+  apt:
+    state: latest
+    update_cache: yes
+    upgrade: "yes"
+
+- name: Set a hostname
+  ansible.builtin.hostname:
+    name: "{{ inventory_hostname }}"
+
+- name: Set hostname to /etc/hosts
+  ansible.builtin.lineinfile:
+    path: /etc/hosts
+    state: "present"
+    regexp: '^127.0.0.1'
+    line: '127.0.0.1       {{ inventory_hostname }}'
+
+- name: install basic linux packages
+  apt:
+    state: latest
+    name:
+      - htop
+      - wget
+      - curl
+      - tmux
+      - nano
+      - jq
+      - tree
+      - ccze
+      - mc
+
+      # to generate certificates
+      - python3-cryptography
+
+- name: autoremove
+  apt:
+    autoremove: True
+    autoclean: True
+
+- include_tasks: fail2ban.yml

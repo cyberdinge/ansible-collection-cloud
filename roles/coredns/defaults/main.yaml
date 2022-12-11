@@ -1,0 +1,68 @@
+installdir: /dockerstacks/coredns
+
+bindip_udp: 0.0.0.0
+bindport_udp: 53
+
+bindip_tcp: 0.0.0.0
+bindport_tcp: 53
+
+bindip_metrics: 127.0.0.1
+bindport_metrics: 9153
+
+docker_image_name: coredns/coredns
+docker_image_version: latest
+service_name: coredns
+coredns_zones: 
+  - name: example.com
+    refresh: 7200
+    retry: 3600
+    expire: 1209600
+    minimum: 3600
+    entries: 
+      - description: info entries
+        static: |
+          config   3600 IN TXT  "version timestamp {{ ansible_date_time.epoch }}"
+          config   3600 IN TXT  "version iso8601 {{ ansible_date_time.iso8601 }}"
+          config   3600 IN TXT  "Never gonna give you up"
+          config   3600 IN TXT  "Never gonna let you down"
+          config   3600 IN TXT  "Never gonna run around and desert you"
+          config   3600 IN TXT  "Never gonna make you cry"
+          config   3600 IN TXT  "Never gonna say goodbye"
+          config   3600 IN TXT  "Never gonna tell a lie and hurt you"
+      - description: examples A AAAA
+        static: |
+          www   IN A      1.2.3.4
+          www   IN AAAA   1234:5678:90ab:cdef::1
+      - description: examples CNAME
+        static: |
+          n     IN CNAME www
+      
+      - description: host group 'inventory_group'
+        group: inventory_group
+              
+  - name: dummy.com
+    refresh: 7200
+    retry: 3600
+    expire: 1209600
+    minimum: 3600
+    entries: 
+      - description: info entries
+        static: |
+          config   3600 IN TXT  "version timestamp {{ ansible_date_time.epoch }}"
+          config   3600 IN TXT  "version iso8601 {{ ansible_date_time.iso8601 }}"
+          config   3600 IN TXT  "Never gonna give you up"
+          config   3600 IN TXT  "Never gonna let you down"
+          config   3600 IN TXT  "Never gonna run around and desert you"
+          config   3600 IN TXT  "Never gonna make you cry"
+          config   3600 IN TXT  "Never gonna say goodbye"
+          config   3600 IN TXT  "Never gonna tell a lie and hurt you"
+      - description: examples A AAAA
+        static: |
+          www   IN A      1.2.3.4
+          www   IN AAAA   1234:5678:90ab:cdef::1
+      - description: examples CNAME
+        static: |
+          n     IN CNAME www
+      - description: host group 'inventory_group'
+        group: inventory_group
+      

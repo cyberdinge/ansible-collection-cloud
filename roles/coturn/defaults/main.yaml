@@ -1,0 +1,47 @@
+## TURN listener port for UDP and TCP (Default: 3478).
+coturn_listening_port: 3478
+
+# TURN listener port for TLS (Default: 5349).
+# Note: actually, "plain" TCP & UDP sessions can connect to the TLS & DTLS
+# port(s), too
+coturn_tls_listening_port: 5349
+
+# Lower and upper bounds of the UDP relay endpoints:
+# (default values are 49152 and 65535)
+coturn_relay_udp_port_min: 49152
+coturn_relay_udp_port_max: 65535
+
+coturn_no_auth: false
+
+# not avaiable ont he current debian package
+coturn_prometheus: false 
+
+coturn_webadmin_enabled: true
+coturn_webadmin_ip: 127.0.0.1
+coturn_webadmin_port: 8084
+
+coturn_no_tlsv1: true
+coturn_no_tlsv1_1: true
+coturn_no_tlsv1_2: false
+
+# to run TURN server in 'normal' 'moderate' verbose mode.
+coturn_verbose: true
+
+coturn_userdb: /var/lib/turn/turndb
+coturn_turnserver_logfile_path: /var/log/turnserver.log
+
+coturn_admin_username: admin
+coturn_admin_password: admin
+
+coturn_realm: example.com
+
+coturn_users:
+  - username: example
+    password: 34857394857394
+    state: present
+
+  - username: dummy
+    password: ERT§%64564TRETe5446
+    state: absent
+
+coturn_certificate_subject: "/C=DE/ST=Cyberraum/L=Hamburg/O=cyberdinge/CN={{ inventory_hostname }}"

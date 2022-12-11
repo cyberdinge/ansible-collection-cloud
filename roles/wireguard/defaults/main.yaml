@@ -1,0 +1,11 @@
+wireguard_network_name: wireguard01
+wireguard_network_mask: 24
+wireguard_server_listen_port: 10001
+
+
+
+# this must be set per host
+#wireguard_address: 172.0.90.2/24
+
+# if not set, the ansible_host is used
+#wireguard_peer_address:

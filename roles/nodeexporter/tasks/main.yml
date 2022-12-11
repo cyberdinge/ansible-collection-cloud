@@ -1,0 +1,22 @@
+---
+# tasks file for cyberdinge.nodeexporter
+
+- name: install prometheus-node-exporter via apt
+  apt:
+    state: latest
+    name: 
+      - prometheus-node-exporter
+
+- name: Set systemd ARGS
+  ansible.builtin.lineinfile:
+    path: /etc/default/prometheus-node-exporter
+    state: "present"
+    regexp: '^ARGS="'
+    line: 'ARGS=" --web.listen-address="{{ nodeexporter_bindip }}:{{ nodeexporter_bindport }}" '
+
+- name: Enable service prometheus-node-exporter and ensure it is enabled and restarted and not masked
+  ansible.builtin.systemd:
+    name: prometheus-node-exporter
+    enabled: yes
+    masked: no
+    state: restarted

@@ -1,0 +1,2 @@
+installdir: /dockerstacks/opentalk
+traefik_providers_docker_network: traefik_proxy

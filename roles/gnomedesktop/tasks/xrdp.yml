@@ -1,0 +1,22 @@
+- name: install xrdp via apt
+  apt:
+    state: latest
+    name: xrdp
+
+# xRDP uses the /etc/ssl/private/ssl-cert-snakeoil.key file which belongs to the ssl-cert group. 
+# As such we need to add the xRDP user to that group:
+- name: add users to group 'ssl-cert'
+  with_items: "{{ users }}"
+  ansible.builtin.user:
+    name: "{{ item.name }}"
+    append: yes
+    group: ssl-cert
+    state: "{{ item.state }}"
+
+- name: add users to group 'tty'
+  with_items: "{{ users }}"
+  ansible.builtin.user:
+    name: "{{ item.name }}"
+    append: yes
+    group: tty
+    state: "{{ item.state }}"    

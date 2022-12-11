@@ -1,0 +1,17 @@
+installdir: /dockerstacks/jitsi
+traefik_providers_docker_network: traefik_proxy
+
+jitsi_image_version: stable-8044-1
+jitsi_restart: always
+
+jitsi_domain: jitsi.example.com
+
+jitsi_etherpad_enabled: false
+jitsi_etherpad_public_url: "https://etherpad.{{ jitsi_domain }}/p/"
+jitsi_etherpad_title: Video Chat
+jitsi_etherpad_pad_text: |
+  Welcome to Web Chat!
+  
+  Please note, that everything in this pad is public readable!
+
+jitsi_colibri_port: 8081

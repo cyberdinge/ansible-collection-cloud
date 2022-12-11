@@ -1,0 +1,86 @@
+---
+
+global:
+  # Send anonymous usage data
+  sendAnonymousUsage: false
+
+## ssl richtung intern nicht pruefen
+serversTransport:
+  insecureSkipVerify: true
+
+## Static configuration
+entryPoints:
+  web:
+    address: ":80"
+    http:
+      redirections:
+        entryPoint:
+          to: websecure
+          scheme: https
+          permanent: true
+  websecure:
+    address: ":443"
+
+  traefik:
+    address: ":8080"
+
+
+certificatesResolvers:
+  letsencryptstaging:
+    acme:
+      caServer: https://acme-staging-v02.api.letsencrypt.org/directory
+      email: {{ traefik_letencrypt_email }}
+      storage: /data/acme.json
+      httpChallenge:
+        entryPoint: web
+
+  letsencrypt:
+    acme:
+      email: {{ traefik_letencrypt_email }}
+      storage: /data/acme.json
+      httpChallenge:
+        entryPoint: web
+
+providers:
+  file:
+    directory: /etc/traefik/static/
+    watch: true
+  docker:
+    endpoint: "unix:///var/run/docker.sock"
+    swarmMode: false
+    exposedByDefault: false
+    network: {{ traefik_providers_docker_network }}
+
+api:
+  dashboard: true
+  insecure: true
+  debug: true
+
+log:
+  filePath: "/logs/traefik.log"
+  format: common
+  level: DEBUG
+
+accessLog:
+  filePath: "/logs/traefik_access.log"
+  bufferingSize: 100
+  format: common
+
+metrics:
+  prometheus:
+    buckets:
+      - 0.1
+      - 0.3
+      - 1.2
+      - 5.0
+    addEntryPointsLabels: true
+    addServicesLabels: true
+    entryPoint: traefik
+
+
+#tracing:
+#  jaeger:
+#    samplingServerURL: http://jaeger:5778/sampling
+#    localAgentHostPort: jaeger:6831
+#    samplingType: const
+#    samplingParam: 1

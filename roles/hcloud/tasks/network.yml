@@ -1,0 +1,19 @@
+- name: Create a basic network
+  hetzner.hcloud.hcloud_network:
+    api_token: "{{ api_token }}"
+    state: "{{ state }}"
+    name: network-a
+    ip_range: 10.0.0.0/24
+    labels:
+      test: sdfjlskdfj
+  register: output
+    
+- name: Create a basic network
+  hetzner.hcloud.hcloud_network:
+    api_token: "{{ api_token }}"
+    state: "{{ state }}"
+    name: network-b
+    ip_range: 10.0.1.0/24
+    labels:
+      test: sdfjlskdfj
+  register: output

@@ -1,0 +1,43 @@
+# promtail
+
+- name: create installdir "{{ installdir }}"
+  file:
+    state: directory
+    path: "{{ installdir }}"
+
+- name: create installdir "{{ installdir }}/config"
+  file:
+    state: directory
+    path: "{{ installdir }}/config"
+
+
+- name: create installdir "{{ installdir }}/data"
+  file:
+    state: directory
+    path: "{{ installdir }}/data"
+
+
+- name: Template config file to "{{ installdir }}/config/promtail.yml"
+  ansible.builtin.template:
+    src: promtail.yml
+    dest: "{{ installdir }}/config/promtail.yml"
+    owner: root
+    group: root
+    mode: '0600'
+    force: yes
+
+- name: Template compose file to "{{ installdir }}/docker-compose.yml"
+  ansible.builtin.template:
+    src: docker-compose.yml
+    dest: "{{ installdir }}/docker-compose.yml"
+    owner: root
+    group: root
+    mode: '0600'
+    force: yes
+
+- name: Create and start services with compose file in "{{ installdir }}"
+  changed_when: false
+  ansible.builtin.shell:
+    cmd: docker compose up -d --remove-orphans
+    chdir: "{{ installdir }}"
+  register: compose_output

@@ -1,0 +1,29 @@
+# opentalk
+
+- name: create installdir "{{ installdir }}"
+  file:
+    state: directory
+    path: "{{ installdir }}"
+
+
+- name: Template compose file to "{{ installdir }}/docker-compose.yml"
+  ansible.builtin.template:
+    src: docker-compose.yml
+    dest: "{{ installdir }}/docker-compose.yml"
+    owner: root
+    group: root
+    mode: '0600'
+    force: yes
+
+
+- name: Create the network for provider.docker (will fail, when already exists, ignore it)
+  ignore_errors: true
+  changed_when: false
+  ansible.builtin.shell: "docker network create {{ traefik_providers_docker_network }}"
+
+- name: Create and start services with compose file in "{{ installdir }}"
+  changed_when: false
+  ansible.builtin.shell:
+    cmd: docker compose up -d --remove-orphans
+    chdir: "{{ installdir }}"
+  register: compose_output

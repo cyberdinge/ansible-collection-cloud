@@ -1,0 +1,8 @@
+installdir: /dockerstacks/traefik
+docker_image: traefik:latest
+bindip: 0.0.0.0
+bindip_metrics: 127.0.0.1
+
+traefik_letencrypt_email: dummy@example.com
+
+traefik_providers_docker_network: traefik_proxy

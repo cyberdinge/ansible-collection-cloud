@@ -1,0 +1,50 @@
+---
+# tasks file for cyberdinge.linux
+
+- name: disable ssh login with password
+  ansible.builtin.lineinfile:
+    path: /etc/ssh/sshd_config
+    state: "present"
+    regexp: '^PasswordAuthentication'
+    line: 'PasswordAuthentication no'              
+
+- name: disable ssh X11 Forwarding
+  ansible.builtin.lineinfile:
+    path: /etc/ssh/sshd_config
+    state: "present"
+    regexp: '^X11Forwarding yes'
+    line: 'X11Forwarding no'              
+
+- name: disable empty passwords 
+  ansible.builtin.lineinfile:
+    path: /etc/ssh/sshd_config
+    state: "present"
+    regexp: '^PermitEmptyPasswords'
+    line: 'PermitEmptyPasswords no'                              
+
+- name: Disable root login via SSH
+  ansible.builtin.lineinfile:
+    path: /etc/ssh/sshd_config
+    state: "present"
+    regexp: '^PermitRootLogin'
+    line: 'PermitRootLogin no'                              
+
+- name: Disable ssh protocol 1
+  ansible.builtin.lineinfile:
+    path: /etc/ssh/sshd_config
+    state: "present"
+    regexp: '^Protocol'
+    line: 'Protocol 2'                              
+
+- name: Configure idle timeout interval
+  ansible.builtin.lineinfile:
+    path: /etc/ssh/sshd_config
+    state: "present"
+    regexp: '^ClientAliveInterval'
+    line: 'ClientAliveInterval 300'                              
+                             
+
+- name: restart sshd to let the changes take effect
+  ansible.builtin.systemd:
+    state: restarted
+    name: sshd

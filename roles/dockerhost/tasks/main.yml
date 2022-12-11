@@ -1,0 +1,53 @@
+---
+# tasks file for cyberdinge.dockerhost
+
+- name: Populate service state information as fact data
+  service_facts:
+
+- name: install docker when it is not running
+  when: "'docker' not in services"
+  block:
+    - name: install dependencies for docker repo
+      apt:
+        state: latest
+        update_cache: yes
+        name: 
+          - gpg
+
+    - name: create keyrings folder /etc/apt/keyrings/ if it not exists
+      file:
+        state: directory
+        path: /etc/apt/keyrings/
+        owner: root
+        group: root
+        mode: '0644'
+
+    - name: Add an Apt signing key, uses whichever key is at the URL
+      ansible.builtin.apt_key:
+        url: https://download.docker.com/linux/debian/gpg
+        state: present
+
+    - name: docker | apt source
+      ansible.builtin.apt_repository:
+        repo: "deb http://download.docker.com/linux/debian {{ hostvars[inventory_hostname].ansible_distribution_release }} stable"
+        filename: docker
+        update_cache: yes
+        validate_certs: yes
+        state: present
+
+    - name: install dependencies for docker repo
+      apt:
+        state: latest
+        update_cache: yes
+        name: 
+          - docker-ce
+          - docker-ce-cli
+          - containerd.io
+          - docker-compose-plugin
+
+    - name: Enable service docker and ensure it is started and not masked
+      ansible.builtin.systemd:
+        name: docker
+        enabled: yes
+        masked: no
+        state: started

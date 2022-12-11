@@ -1,0 +1,59 @@
+---
+version: "3"
+services:
+  keycloak:
+    image: {{ docker_image }}
+    restart: always
+    user: 0:0
+    volumes:
+      - "{{ installdir }}/data:/opt/keycloak/data:rw"
+      - "{{ installdir }}/certs:/etc/x509/https:rw"
+    environment:
+      KEYCLOAK_ADMIN: {{ keycloak_admin_username }}
+      KEYCLOAK_ADMIN_PASSWORD: {{ keycloak_admin_password }}
+      KEYCLOAK_LOGLEVEL: {{ keycloak_loglevel }}
+      KEYCLOAK_FRONTEND_URL: {{ keycloak_frontend_url }}
+    command: >
+      start
+      --https-certificate-file=/etc/x509/https/tls.crt
+      --https-certificate-key-file=/etc/x509/https/tls.key
+      --https-protocols={{ keycloak_https_protocols }}
+      --https-port={{ keycloak_https_port }}
+      --hostname={{ keycloak_domain }}
+      --hostname-admin={{ keycloak_domain }}
+      --proxy=edge
+
+    labels:
+      - traefik.enable=true
+
+      - traefik.http.routers.keycloak.rule=Host(`{{ keycloak_domain }}`)
+      - traefik.http.routers.keycloak.entrypoints=web
+      - traefik.http.routers.keycloak.service=keycloak
+      - traefik.http.routers.keycloaks.rule=Host(`{{ keycloak_domain }}`)
+      - traefik.http.routers.keycloaks.entrypoints=websecure
+      - traefik.http.routers.keycloaks.service=keycloak
+      - traefik.http.routers.keycloaks.tls=true
+      - traefik.http.routers.keycloaks.tls.certresolver=letsencrypt
+
+      - traefik.http.routers.keycloak_admin.rule=Host(`{{ keycloak_domain_admin }}`)
+      - traefik.http.routers.keycloak_admin.entrypoints=web
+      - traefik.http.routers.keycloak_admin.service=keycloak
+      - traefik.http.routers.keycloak_admins.rule=Host(`{{ keycloak_domain_admin }}`)
+      - traefik.http.routers.keycloak_admins.entrypoints=websecure
+      - traefik.http.routers.keycloak_admins.service=keycloak
+      - traefik.http.routers.keycloak_admins.tls=true
+      - traefik.http.routers.keycloak_admins.tls.certresolver=letsencrypt
+
+      - traefik.http.services.keycloak.loadbalancer.server.port=8080
+    networks:
+      - {{ traefik_providers_docker_network }}
+    hostname: "keycloak.{{ inventory_hostname }}"
+    logging:
+      driver: syslog
+      options:
+        tag: "keycloak"
+
+networks:
+  # network in dem traefik ist, damit dieser hier hin routen kann
+  {{ traefik_providers_docker_network }}:
+    external: true

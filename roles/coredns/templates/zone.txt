@@ -1,0 +1,42 @@
+{{ zone.name }}.  3600 IN SOA ns1.{{ zone.name }}. ns1.{{ zone.name }}. (
+                                {{ ansible_date_time.epoch }} ; serial
+                                {{ zone.refresh }} ; refresh (2 hours)
+                                {{ zone.retry }} ; retry (1 hour)
+                                {{ zone.expire }} ; expire (2 weeks)
+                                {{ zone.minimum }} ; minimum (1 hour)
+                                )
+
+
+; #################### list all static entries
+{% if zone.entries %}{% for entry in zone.entries %}{% if 'static' in entry and entry.static %}; {{ entry.description }}
+{{ entry.static }}
+{% endif %}{% endfor %}{% endif %}
+
+; #################### list all group entries
+{% if zone.entries %}{% for entry in zone.entries %}{% if 'group' in entry and entry.group %}; {{ entry.description }}
+
+{% for host in groups[entry.group] %}
+; 
+; group host '{{ host }}'
+; 
+{% if 'ipv4' in hostvars[host] %}{{ host }} IN A {{ hostvars[host].ipv4}}{% else %}; '{{ host }}' has no ipv4
+{% endif %}
+
+{% if 'ipv6_network' in hostvars[host] %}{{ host }} IN AAAA {{ hostvars[host].ipv6_network}}1{% else %}; '{{ host }}' has no ipv6
+{% endif %}
+
+{% endfor %}
+
+{% endif %}{% endfor %}{% endif %}
+
+; #################### per host based entries
+{% for host in hostvars %}{% if 'coredns_entries' in hostvars[host] %}{% for entryzone in hostvars[host].coredns_entries %}
+
+{% if entryzone.zone == zone.name %}
+; per host based entries for host '{{ host }}'
+; {{ entryzone.description }}
+{{ entryzone.static }}
+{% endif %}
+
+
+{% endfor %}{% endif %}{% endfor %}

@@ -1,0 +1,24 @@
+---
+version: "3"
+services:
+  prometheus:
+    image: {{ docker_image_name }}:{{ docker_image_version }}
+    restart: always
+    command: |
+      --config.file="/etc/prometheus/prometheus.yml"
+      --storage.tsdb.path="/data/"
+      --web.page-title="{{ inventory_hostname }}"
+      --storage.tsdb.retention.size={{ storage_tsdb_retention_size }}
+      --web.enable-admin-api 
+      --web.enable-lifecycle
+    user: 0:0
+    volumes:
+      - "{{ installdir }}/config:/etc/prometheus:ro"
+      - "{{ installdir }}/data:/data:rw"
+    ports:
+      - "{{ bindip_tcp }}:{{ bindport_tcp }}:9090/tcp"
+    hostname: "prometheus.{{ inventory_hostname }}"
+    logging:
+      driver: syslog
+      options:
+        tag: "prometheus"

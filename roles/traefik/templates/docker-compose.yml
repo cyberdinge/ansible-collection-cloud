@@ -1,0 +1,26 @@
+---
+version: "3"
+services:
+  traefik:
+    image: {{ docker_image }}
+    restart: always
+    volumes:
+      - "{{ installdir }}/etc:/etc/traefik:ro"
+      - "{{ installdir }}/data:/data:rw"
+      - /var/log/traefik:/logs:rw
+      - /var/run/docker.sock:/var/run/docker.sock
+
+    ports:
+      - "{{ bindip }}:80:80/tcp"
+      - "{{ bindip }}:443:443/tcp"
+      - "{{ bindip_metrics }}:8080:8080/tcp"
+    networks:
+      - {{ traefik_providers_docker_network }}
+    hostname: "traefik.{{ inventory_hostname }}"
+    logging:
+      driver: syslog
+      options:
+        tag: "traefik"
+networks:
+  {{ traefik_providers_docker_network }}:
+    external: true
