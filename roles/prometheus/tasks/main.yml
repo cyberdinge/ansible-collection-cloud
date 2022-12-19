@@ -1,45 +1,69 @@
 ---
 # tasks file for cyberdinge.prometheus
 
-- name: create installdir "{{ installdir }}"
+- name: create installdir "{{ prometheus_installdir }}"
   file:
     state: directory
-    path: "{{ installdir }}"
+    path: "{{ prometheus_installdir }}"
 
-- name: create installdir "{{ installdir }}/config"
+- name: create installdir "{{ prometheus_installdir }}/config"
   file:
     state: directory
-    path: "{{ installdir }}/config"
-    
-- name: Template prometheus config in "{{ installdir }}/config/prometheus.yml"
-  changed_when: false
-  ansible.builtin.template:
-    src: prometheus.yml
-    dest: "{{ installdir }}/config/prometheus.yml"
+    path: "{{ prometheus_installdir }}/config"
+
+- name: create directory for file based scrape config "{{ prometheus_installdir }}/config/scrapeconfig"
+  file:
+    state: directory
+    path: "{{ prometheus_installdir }}/config/scrapeconfig"
+
+- name: create directory for rules "{{ prometheus_installdir }}/config/rules"
+  file:
+    state: directory
+    path: "{{ prometheus_installdir }}/config/rules"
+
+- name: copy rules to host "{{ prometheus_installdir }}/config/rules/xxx"
+  with_items:
+    - rules_blackbox_exporter.yml
+    - rules_node_exporter.yml
+    - rules_prometheus.yml
+    - rules_traefik.yml
+  ansible.builtin.copy:
+    src: "{{ item }}"
+    dest: "{{ prometheus_installdir }}/config/rules/{{ item }}"
     owner: root
     group: root
     mode: '0660'
     force: yes
 
-- name: Template compose file to "{{ installdir }}/docker-compose.yml"
+- name: Template prometheus config in "{{ prometheus_installdir }}/config/prometheus.yml"
+  changed_when: false
+  ansible.builtin.template:
+    src: prometheus.yml
+    dest: "{{ prometheus_installdir }}/config/prometheus.yml"
+    owner: root
+    group: root
+    mode: '0660'
+    force: yes
+
+- name: Template compose file to "{{ prometheus_installdir }}/docker-compose.yml"
   changed_when: false
   ansible.builtin.template:
     src: docker-compose.yml
-    dest: "{{ installdir }}/docker-compose.yml"
+    dest: "{{ prometheus_installdir }}/docker-compose.yml"
     owner: root
     group: root
     mode: '0600'
     force: yes
 
-- name: Create and start prometheus with compose file in "{{ installdir }}"
+- name: Create and start prometheus with compose file in "{{ prometheus_installdir }}"
   changed_when: false
   ansible.builtin.shell:
     cmd: docker compose up -d --remove-orphans
-    chdir: "{{ installdir }}"
+    chdir: "{{ prometheus_installdir }}"
   register: compose_output
 
 - name: let prometheus reload its config
   changed_when: false
   ansible.builtin.shell:
     cmd: docker compose exec -it prometheus kill -1 1
-    chdir: "{{ installdir }}"
+    chdir: "{{ prometheus_installdir }}"

@@ -3,7 +3,7 @@
 
 - name: update all
   apt:
-    state: latest
+    state: present
     update_cache: yes
     upgrade: "yes"
 
@@ -20,7 +20,7 @@
 
 - name: install basic linux packages
   apt:
-    state: latest
+    state: present
     name:
       - htop
       - wget
@@ -31,7 +31,7 @@
       - tree
       - ccze
       - mc
-
+      - zsh
       # to generate certificates
       - python3-cryptography
 

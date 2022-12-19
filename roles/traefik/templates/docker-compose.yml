@@ -1,26 +1,37 @@
 ---
 version: "3"
 services:
-  traefik:
-    image: {{ docker_image }}
+  {{ traefik_servicename }}:
+    image: "{{ traefik_docker_image }}"
     restart: always
     volumes:
-      - "{{ installdir }}/etc:/etc/traefik:ro"
-      - "{{ installdir }}/data:/data:rw"
-      - /var/log/traefik:/logs:rw
+      - "{{ traefik_installdir }}/etc:/etc/traefik:ro"
+      - "{{ traefik_installdir }}/data:/data:rw"
       - /var/run/docker.sock:/var/run/docker.sock
 
     ports:
-      - "{{ bindip }}:80:80/tcp"
-      - "{{ bindip }}:443:443/tcp"
-      - "{{ bindip_metrics }}:8080:8080/tcp"
+      # public
+      - "{{ traefik_bindip }}:{{ traefik_bindport_web }}:80/tcp"
+      - "{{ traefik_bindip }}:{{ traefik_bindport_websecure }}:443/tcp"
+      
+      # traefik dashboard/metrics
+      - "{{ traefik_bindip_metrics }}:{{traefik_bindport_traefik }}:8080/tcp"
+      
+      # intern
+      - "{{ traefik_bindip_intern }}:{{ traefik_bindport_webintern }}:81/tcp"
+      - "{{ traefik_bindip_intern }}:{{ traefik_bindport_webinternsecure }}:444/tcp"
+
     networks:
       - {{ traefik_providers_docker_network }}
-    hostname: "traefik.{{ inventory_hostname }}"
-    logging:
-      driver: syslog
-      options:
-        tag: "traefik"
+      - metrics
+    labels:
+      prometheus-job: traefik
+      prometheus-port: 8080
+      prometheus-path: /metrics
+    hostname: "{{ traefik_servicename }}.{{ inventory_hostname }}"
+
 networks:
+  metrics:
+    name: metrics_network
   {{ traefik_providers_docker_network }}:
     external: true

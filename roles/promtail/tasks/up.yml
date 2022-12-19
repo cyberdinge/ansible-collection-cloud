@@ -1,43 +1,50 @@
 # promtail
 
-- name: create installdir "{{ installdir }}"
+- name: create installdir "{{ promtail_installdir }}"
   file:
     state: directory
-    path: "{{ installdir }}"
+    path: "{{ promtail_installdir }}"
 
-- name: create installdir "{{ installdir }}/config"
+- name: create installdir "{{ promtail_installdir }}/config"
   file:
     state: directory
-    path: "{{ installdir }}/config"
+    path: "{{ promtail_installdir }}/config"
 
 
-- name: create installdir "{{ installdir }}/data"
+- name: create installdir "{{ promtail_installdir }}/data"
   file:
     state: directory
-    path: "{{ installdir }}/data"
+    path: "{{ promtail_installdir }}/data"
 
 
-- name: Template config file to "{{ installdir }}/config/promtail.yml"
+- name: Template config file to "{{ promtail_installdir }}/config/promtail.yml"
   ansible.builtin.template:
     src: promtail.yml
-    dest: "{{ installdir }}/config/promtail.yml"
+    dest: "{{ promtail_installdir }}/config/promtail.yml"
     owner: root
     group: root
     mode: '0600'
     force: yes
+  register: config_templating
 
-- name: Template compose file to "{{ installdir }}/docker-compose.yml"
+- name: Template compose file to "{{ promtail_installdir }}/docker-compose.yml"
   ansible.builtin.template:
     src: docker-compose.yml
-    dest: "{{ installdir }}/docker-compose.yml"
+    dest: "{{ promtail_installdir }}/docker-compose.yml"
     owner: root
     group: root
     mode: '0600'
     force: yes
 
-- name: Create and start services with compose file in "{{ installdir }}"
+- name: Create and start services with compose file in "{{ promtail_installdir }}"
   changed_when: false
   ansible.builtin.shell:
     cmd: docker compose up -d --remove-orphans
-    chdir: "{{ installdir }}"
+    chdir: "{{ promtail_installdir }}"
   register: compose_output
+
+- name: restart container when config has changed
+  when: config_templating.changed
+  ansible.builtin.shell:
+    cmd: docker compose restart
+    chdir: "{{ promtail_installdir }}"

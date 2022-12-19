@@ -1,0 +1,19 @@
+# handlers file for cyberdinge.prometheus
+
+- name: "prometheus - add static scrape file"
+  ansible.builtin.copy:
+    dest: "{{ prometheus_installdir }}/config/scrapeconfig/{{ inventory_hostname}}_{{ scrape_target_job }}.yml"
+    owner: root
+    group: root
+    mode: '0660'
+    force: yes
+    content: |
+      ---
+      - labels:
+          job: "{{ scrape_target_job }}"
+          hostname: "{{ scrape_target_hostname }}"
+          domain: "{{ scrape_target_domain }}"    
+          network: "{{ scrape_target_network }}"
+
+        targets:
+          - "{{ scrape_target_url }}"

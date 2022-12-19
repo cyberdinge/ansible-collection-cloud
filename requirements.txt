@@ -1,2 +1,4 @@
 hcloud
 PyVmomi
+mkdocs
+mkdocs-mermaid2-plugin

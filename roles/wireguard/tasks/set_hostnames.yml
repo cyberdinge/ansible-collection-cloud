@@ -1,0 +1,9 @@
+# set hostnames of peers to /etc/hosts
+
+- name: add hostname of peers to /etc/hosts
+  with_items: "{{ groups[wireguard_network_name] }}"
+  ansible.builtin.lineinfile:
+    path: /etc/hosts
+    state: "present"
+    regexp: '^{{ hostvars[item].wireguard_address }}'
+    line: "{{ hostvars[item].wireguard_address }} {{ hostvars[item].inventory_hostname }}.{{ wireguard_network_name }}"

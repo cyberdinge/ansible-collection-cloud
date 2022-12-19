@@ -2,7 +2,7 @@
 version: '3.5'
 services:
     # Frontend
-    web:
+    {{ jitsi_servicename }}_web:
         image: jitsi/web:{{ jitsi_image_version }}
         restart: {{ jitsi_restart }}
         # routed by traefik via labels        
@@ -25,9 +25,9 @@ services:
           - traefik.http.services.jitsi.loadbalancer.server.port=80
 
         volumes:
-            - {{ installdir }}/web:/config:Z
-            - {{ installdir }}/web/crontabs:/var/spool/cron/crontabs:Z
-            - {{ installdir }}/transcripts:/usr/share/jitsi-meet/transcripts:Z
+            - {{ jitsi_installdir }}/web:/config:Z
+            - {{ jitsi_installdir }}/web/crontabs:/var/spool/cron/crontabs:Z
+            - {{ jitsi_installdir }}/transcripts:/usr/share/jitsi-meet/transcripts:Z
         environment:
             - AMPLITUDE_ID
             - ANALYTICS_SCRIPT_URLS
@@ -162,16 +162,12 @@ services:
             - XMPP_RECORDER_DOMAIN
             - XMPP_PORT
         networks:
-            meet.jitsi:
+            {{ jitsi_servicename }}_meet.jitsi:
             {{ traefik_providers_docker_network }}:
-        hostname: "web.{{jitsi_domain}}"
-        logging:
-          driver: syslog
-          options:
-            tag: "web"
+        hostname: "{{ jitsi_servicename }}_web.{{jitsi_domain}}"
 
     # XMPP server
-    prosody:
+    {{ jitsi_servicename }}_prosody:
         image: jitsi/prosody:{{ jitsi_image_version }}
         restart: {{ jitsi_restart }}
         expose:
@@ -179,8 +175,8 @@ services:
             - '5347'
             - '5280'
         volumes:
-            - {{ installdir }}/prosody/config:/config:Z
-            - {{ installdir }}/prosody/prosody-plugins-custom:/prosody-plugins-custom:Z
+            - {{ jitsi_installdir }}/prosody/config:/config:Z
+            - {{ jitsi_installdir }}/prosody/prosody-plugins-custom:/prosody-plugins-custom:Z
         environment:
             - AUTH_TYPE
             - DISABLE_POLLS
@@ -262,21 +258,17 @@ services:
             - XMPP_RECORDER_DOMAIN
             - XMPP_PORT
         networks:
-            meet.jitsi:
+            {{ jitsi_servicename }}_meet.jitsi:
                 aliases:
                     - ${XMPP_SERVER:-xmpp.meet.jitsi}
-        hostname: "prosody.{{jitsi_domain}}"
-        logging:
-          driver: syslog
-          options:
-            tag: "prosody"
+        hostname: "{{ jitsi_servicename }}_prosody.{{jitsi_domain}}"
 
     # Focus component
-    jicofo:
+    {{ jitsi_servicename }}_jicofo:
         image: jitsi/jicofo:{{ jitsi_image_version }}
         restart: {{ jitsi_restart }}
         volumes:
-            - {{ installdir }}/jicofo:/config:Z
+            - {{ jitsi_installdir }}/jicofo:/config:Z
         environment:
             - AUTH_TYPE
             - BRIDGE_AVG_PARTICIPANT_STRESS
@@ -316,24 +308,20 @@ services:
             - XMPP_SERVER
             - XMPP_PORT
         depends_on:
-            - prosody
+            - {{ jitsi_servicename }}_prosody
         networks:
-            meet.jitsi:
-        hostname: "jicofo.{{jitsi_domain}}"
-        logging:
-          driver: syslog
-          options:
-            tag: "jicofo"
+            {{ jitsi_servicename }}_meet.jitsi:
+        hostname: "{{ jitsi_servicename }}_jicofo.{{jitsi_domain}}"
 
     # Video bridge
-    jvb:
+    {{ jitsi_servicename }}_jvb:
         image: jitsi/jvb:{{ jitsi_image_version }}
         restart: {{ jitsi_restart }}
         ports:
             - '${JVB_PORT:-10000}:${JVB_PORT:-10000}/udp'
             - '127.0.0.1:${JVB_COLIBRI_PORT:-8080}:8080'
         volumes:
-            - {{ installdir }}/jvb:/config:Z
+            - {{ jitsi_installdir }}/jvb:/config:Z
         environment:
             - DOCKER_HOST_ADDRESS
             - ENABLE_COLIBRI_WEBSOCKET
@@ -365,19 +353,15 @@ services:
             - XMPP_SERVER
             - XMPP_PORT
         depends_on:
-            - prosody
+            - {{ jitsi_servicename }}_prosody
         networks:
-            meet.jitsi:
-        hostname: "jvb.{{jitsi_domain}}"
-        logging:
-          driver: syslog
-          options:
-            tag: "jvb"
+            {{ jitsi_servicename }}_meet.jitsi:
+        hostname: "{{ jitsi_servicename }}_jvb.{{jitsi_domain}}"
 
             
 {% if jitsi_etherpad_enabled %}
 
-    etherpad:
+    {{ jitsi_servicename }}_etherpad:
         image: etherpad/etherpad:latest
         restart: {{ jitsi_restart }}
         # routed by traefik via labels        
@@ -397,16 +381,12 @@ services:
           - traefik.http.routers.etherpads.tls.certresolver=letsencrypt
 
           - traefik.http.services.etherpad.loadbalancer.server.port=9001
-        hostname: "etherpad.{{jitsi_domain}}"
-        logging:
-          driver: syslog
-          options:
-            tag: "etherpad"
+        hostname: "{{ jitsi_servicename }}_etherpad.{{jitsi_domain}}"
 {% endif %}
 
 
 # Custom network so all services can communicate using a FQDN
 networks:
-    meet.jitsi:
+    {{ jitsi_servicename }}_meet.jitsi:
     {{ traefik_providers_docker_network }}:
       external: true

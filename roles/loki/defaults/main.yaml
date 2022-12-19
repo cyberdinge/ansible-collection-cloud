@@ -1,0 +1,8 @@
+loki_installdir: /dockerstacks/loki
+loki_docker_image: grafana/loki:latest
+loki_servicename: loki
+loki_state: present
+loki_bindip_tcp: 127.0.0.1
+loki_bindport_tcp: 3100
+loki_alertmanager_url: http://localhost:9093
+loki_reporting_enabled: false

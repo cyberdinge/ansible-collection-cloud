@@ -1,0 +1,5 @@
+- when: wireguardui_state == "present"
+  include_tasks: up.yml
+
+- when: wireguardui_state != "present"
+  include_tasks: down.yml

@@ -1,0 +1,65 @@
+---
+version: '3.5'
+services:
+  {{ wireguardui_servicename }}:
+    image: "{{ wireguardui_docker_image }}"
+    restart: always
+    # For DHCP it is recommended to remove these ports and instead add: network_mode: "host"
+    environment:
+      SESSION_SECRET: "{{ WGUI_SESSION_SECRET }}"
+      WGUI_USERNAME: "{{ WGUI_USERNAME }}"
+      WGUI_PASSWORD: "{{ WGUI_PASSWORD }}"
+      #WGUI_PASSWORD_HASH: "{{ WGUI_PASSWORD_HASH }}" 
+      WGUI_ENDPOINT_ADDRESS: "{{ WGUI_ENDPOINT_ADDRESS }}"
+
+      WGUI_DNS: "{{ WGUI_DNS }}"
+      WGUI_MTU: "{{ WGUI_MTU }}"
+      WGUI_PERSISTENT_KEEPALIVE: "{{ WGUI_PERSISTENT_KEEPALIVE }}"
+      WGUI_FORWARD_MARK: "{{ WGUI_FORWARD_MARK }}"
+      WGUI_CONFIG_FILE_PATH: "{{ WGUI_CONFIG_FILE_PATH }}"
+      BASE_PATH: "{{ BASE_PATH }}"
+
+      WGUI_SERVER_INTERFACE_ADDRESSES: "{{ WGUI_SERVER_INTERFACE_ADDRESSES }}"
+      WGUI_SERVER_LISTEN_PORT: "{{ WGUI_SERVER_LISTEN_PORT }}"
+      WGUI_SERVER_POST_UP_SCRIPT: "{{ WGUI_SERVER_POST_UP_SCRIPT }}"
+      WGUI_SERVER_POST_DOWN_SCRIPT: "{{ WGUI_SERVER_POST_DOWN_SCRIPT }}"
+
+      WGUI_DEFAULT_CLIENT_ALLOWED_IPS: "{{ WGUI_DEFAULT_CLIENT_ALLOWED_IPS }}"
+      WGUI_DEFAULT_CLIENT_EXTRA_ALLOWED_IPS: "{{ WGUI_DEFAULT_CLIENT_EXTRA_ALLOWED_IPS }}"
+      WGUI_DEFAULT_CLIENT_USE_SERVER_DNS: "{{ WGUI_DEFAULT_CLIENT_USE_SERVER_DNS }}"
+      WGUI_DEFAULT_CLIENT_ENABLE_AFTER_CREATION: "{{ WGUI_DEFAULT_CLIENT_ENABLE_AFTER_CREATION }}"
+
+      # WG_CONF_TEMPLATE
+      
+    # Volumes store your data between container upgrades
+    volumes:
+      - '${PWD}/data/db:/app/db'
+      - '${PWD}/data/etc/wireguard:/etc/wireguard'
+    cap_add:
+      - NET_ADMIN
+    network_mode: host
+    labels:
+      - traefik.enable=true
+
+      - traefik.http.routers.{{ wireguardui_servicename }}.rule=Host(`{{ wireguardui_domain }}`)
+      - traefik.http.routers.{{ wireguardui_servicename }}.entrypoints=web
+      - traefik.http.routers.{{ wireguardui_servicename }}.service={{ wireguardui_servicename }}
+
+      - traefik.http.routers.{{ wireguardui_servicename }}s.rule=Host(`{{ wireguardui_domain }}`)
+      - traefik.http.routers.{{ wireguardui_servicename }}s.entrypoints=websecure
+      - traefik.http.routers.{{ wireguardui_servicename }}s.service={{ wireguardui_servicename }}
+      - traefik.http.routers.{{ wireguardui_servicename }}s.tls=true
+      - traefik.http.routers.{{ wireguardui_servicename }}s.tls.certresolver=letsencrypt
+
+      - traefik.http.services.{{ wireguardui_servicename }}.loadbalancer.server.port=5000
+    # networks:
+    #   - {{ traefik_providers_docker_network }}
+    hostname: "{{ wireguardui_domain }}"
+    logging:
+      driver: syslog
+      options:
+        tag: "{{ wireguardui_domain }}"
+networks:
+  # network in dem traefik ist, damit dieser hier hin routen kann
+  {{ traefik_providers_docker_network }}:
+    external: true

@@ -1,0 +1,12 @@
+# TODO bring pihole down when installed
+- name: Create and start services with compose file in "{{ pihole_installdir }}"
+  changed_when: false
+  ansible.builtin.shell:
+    cmd: docker compose down
+    chdir: "{{ pihole_installdir }}"
+  register: compose_output
+
+- name: delete installdir "{{ pihole_installdir }}"
+  file:
+    state: absent
+    path: "{{ pihole_installdir }}"  

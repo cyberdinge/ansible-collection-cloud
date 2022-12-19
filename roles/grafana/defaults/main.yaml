@@ -1,0 +1,6 @@
+grafana_installdir: /dockerstacks/grafana
+grafana_docker_image: grafana/grafana:latest
+grafana_servicename: grafana
+grafana_state: present
+grafana_bindip_tcp: 127.0.0.1
+grafana_bindport_tcp: 3000

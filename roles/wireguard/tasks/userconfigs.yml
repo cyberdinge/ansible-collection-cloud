@@ -1,0 +1,30 @@
+---
+- name: Read publickeys from peers of group "{{ wireguard_network_name }}"
+  with_items: "{{ groups[wireguard_network_name] }}"
+  ignore_errors: true
+  include_tasks: "read_publickey.yaml"
+
+- name: create directory to store wireguard network configs for users
+  file:
+    state: directory
+    path: "{{ wireguard_local_client_config_directory }}"
+
+- name: 'Templating network config file "{{ wireguard_network_name }}_<user.name>.conf" on host "{{ host }}"'
+  with_items: "{{ users }}"
+  when: "'wireguard_address' in user and 'wireguard_public_key' in user"
+  loop_control:
+    loop_var: user
+  ansible.builtin.template:
+    src: user_config_file.conf
+    dest: "{{ wireguard_local_client_config_directory }}/{{ user.name }}.conf"
+    force: yes
+
+- name: generate qr codes for clients
+  with_items: "{{ users }}"
+  when: "'wireguard_address' in user and 'wireguard_public_key' in user"
+  loop_control:
+    loop_var: user
+  ansible.builtin.shell:
+    #cmd: "cat {{ user.name }}.conf | qrencode -t ansiutf8 -o {{ user.name }}.png "
+    cmd: "qrencode -t png -r {{ user.name }}.conf -o {{ user.name }}.png "
+    chdir: "{{ wireguard_local_client_config_directory }}"

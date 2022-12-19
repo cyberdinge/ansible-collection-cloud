@@ -1,5 +1,6 @@
-installdir: /dockerstacks/promtail
-docker_image: grafana/promtail:latest
+promtail_installdir: /dockerstacks/promtail
+promtail_docker_image: grafana/promtail:latest
+promtail_servicename: promtail
 promtail_loki_url: http://loki:3100/loki/api/v1/push
 promtail_http_listen_port: 9080
 promtail_grpc_listen_port: 0

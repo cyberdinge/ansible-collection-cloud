@@ -1,3 +1,5 @@
+# https://grafana.com/docs/loki/latest/clients/promtail/configuration/
+
 server:
   http_listen_port: {{ promtail_http_listen_port }}
   grpc_listen_port: {{ promtail_grpc_listen_port }}
@@ -16,4 +18,36 @@ scrape_configs:
     labels:
       job: varlogs
       hostname: {{ inventory_hostname }}
+      network: {{ wireguard_network_name }}
+      domain: {{ project_domain }}
       __path__: /var/log/*log
+
+
+- job_name: docker_container 
+  docker_sd_configs:
+    - host: unix:///var/run/docker.sock
+      refresh_interval: 5s
+      # filters:
+      #   - name: name
+      #     values: [flog] 
+  relabel_configs:
+    - source_labels: ['__meta_docker_container_name']
+      regex: '/(.*)'
+      target_label: 'container'
+
+    # add the internal hostname to a label
+    # source label must be one that exists, so use __address__
+    - source_labels: [__address__]
+      # target label is the one you want to create
+      target_label: hostname
+      replacement: "{{ inventory_hostname }}"
+
+    - source_labels: [__address__]
+      # target label is the one you want to create
+      target_label: network
+      replacement: "{{ wireguard_network_name }}"
+      
+    - source_labels: [__address__]
+      # target label is the one you want to create
+      target_label: domain
+      replacement: "{{ project_domain }}"

@@ -15,4 +15,6 @@ tls:
         - TLS_ECDHE_ECDSA_WITH_CHACHA20_POLY1305
         - TLS_ECDHE_RSA_WITH_CHACHA20_POLY1305
       minVersion: VersionTLS12
-      #sniStrict: true
+{% if traefik_letencrypt_enabled %} 
+      sniStrict: {{ traefik_tls_options_default_strictsni }}
+{% endif %} 

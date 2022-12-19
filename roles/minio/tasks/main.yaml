@@ -1,0 +1,29 @@
+---
+# tasks file for cyberdinge.minio
+
+- name: create installdir "{{ minio_installdir }}"
+  file:
+    state: directory
+    path: "{{ minio_installdir }}"
+
+- name: create installdir "{{ minio_installdir }}/config"
+  file:
+    state: directory
+    path: "{{ minio_installdir }}/config"
+
+- name: Template compose file to "{{ minio_installdir }}/docker-compose.yml"
+  changed_when: false
+  ansible.builtin.template:
+    src: docker-compose.yml
+    dest: "{{ minio_installdir }}/docker-compose.yml"
+    owner: root
+    group: root
+    mode: '0600'
+    force: yes
+
+- name: Create and start minio with compose file in "{{ minio_installdir }}"
+  changed_when: false
+  ansible.builtin.shell:
+    cmd: docker compose up -d --remove-orphans
+    chdir: "{{ minio_installdir }}"
+  register: compose_output

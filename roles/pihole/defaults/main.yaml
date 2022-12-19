@@ -1,0 +1,12 @@
+pihole_installdir: /dockerstacks/pihole
+pihole_docker_image: pihole/pihole:latest
+pihole_servicename: pihole
+traefik_providers_docker_network: traefik_proxy
+pihole_domain: "pihole.{{ inventory_hostname }}.{{ project_domain }}"
+pihole_password: 9d8s0d98fs09d8fms09d8fms09d8fm
+pihole_timezone: Europe/Berlin
+pihole_dns_listen_ip: 0.0.0.0
+pihole_dns_listen_port: 53
+pihole_admin_listen_ip: 0.0.0.0
+pihole_admin_listen_port: 80
+pihole_state: present

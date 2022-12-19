@@ -25,12 +25,12 @@
     create: yes
     state: "{% if item.sudoer %}present{% else %}absent{% endif %}"
     regexp: '^{{ item.name }}'
-    line: '{{ item.name }} ALL=(ALL) NOPASSWD:ALL'   
+    line: '{{ item.name }} ALL=(ALL) NOPASSWD:ALL'
 
 - name: set bash promt PS1 for users
   with_items: "{{ users }}"
   when: item.state == "present"
-  ansible.builtin.lineinfile: 
+  ansible.builtin.lineinfile:
     path: "/home/{{ item.name }}/.bashrc"
     regex: "^#force_color_prompt=yes"
     line: 'force_color_prompt=yes'

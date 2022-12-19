@@ -1,17 +1,17 @@
-installdir: /dockerstacks/coredns
+coredns_installdir: /dockerstacks/coredns
 
-bindip_udp: 0.0.0.0
-bindport_udp: 53
+coredns_bindip_udp: 0.0.0.0
+coredns_bindport_udp: 53
 
-bindip_tcp: 0.0.0.0
-bindport_tcp: 53
+coredns_bindip_tcp: 0.0.0.0
+coredns_bindport_tcp: 53
 
-bindip_metrics: 127.0.0.1
-bindport_metrics: 9153
+coredns_bindip_metrics: 127.0.0.1
+coredns_bindport_metrics: 9153
 
-docker_image_name: coredns/coredns
-docker_image_version: latest
-service_name: coredns
+coredns_docker_image_name: coredns/coredns
+coredns_docker_image_version: latest
+coredns_servicename: coredns
 coredns_zones: 
   - name: example.com
     refresh: 7200
@@ -65,4 +65,14 @@ coredns_zones:
           n     IN CNAME www
       - description: host group 'inventory_group'
         group: inventory_group
-      
+
+# the content will be added to the Corefile
+
+# example of forwarding requests to one or more upstreams    
+    # coredns_corefile_extras: |
+    #   . {
+    #     log
+    #     errors
+    #     forward . 8.8.8.8 9.9.9.9
+    #   }
+coredns_corefile_extras: "# coredns_corefile_extras, empty per default"

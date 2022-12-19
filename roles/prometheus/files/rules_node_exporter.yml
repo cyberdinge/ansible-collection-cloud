@@ -1,0 +1,144 @@
+---
+groups:
+
+- name: node_exporter
+  rules:
+
+  - record: instance:node_cpus:count
+    expr: count without(cpu, mode) (node_cpu_seconds_total{mode="idle"})
+  - record: instance_cpu:node_cpu_seconds_not_idle:rate1m
+    expr: sum without(mode) (rate(node_cpu_seconds_total{mode!="idle"}[1m]))
+  - record: instance_mode:node_cpu_seconds:rate1m
+    expr: sum without(cpu) (rate(node_cpu_seconds_total[1m]))
+  - record: instance_mode:node_cpu_seconds:rate5m
+    expr: sum without(cpu) (rate(node_cpu_seconds_total[5m]))
+  - record: instance:node_cpu_utilization:ratio
+    expr: sum without(mode) (instance_mode:node_cpu_seconds:rate1m{mode!="idle"}) / instance:node_cpus:count
+  - record: job:node_cpu_utilization:min_ratio
+    expr: min without(fqdn, instance) (instance:node_cpu_in_use:ratio)
+  - record: job:node_cpu_utilization:avg_ratio
+    expr: avg without(fqdn, instance) (instance:node_cpu_in_use:ratio)
+  - record: job:node_cpu_utilization:max_ratio
+    expr: max without(fqdn, instance) (instance:node_cpu_in_use:ratio)
+
+  - record: instance:node_memory_available:ratio
+    expr: (node_memory_MemAvailable_bytes or (node_memory_MemFree_bytes + node_memory_Buffers_bytes + node_memory_Cached_bytes)) / node_memory_MemTotal_bytes
+  - record: instance:node_memory_utilization:ratio
+    expr: 1 - instance:node_memory_available:ratio
+
+
+
+  - alert: PreditciveHostMountpointSpace
+    expr:  predict_linear(node_filesystem_avail_bytes[72h], 72 *3600) < 0
+    for: 60m
+    labels:
+      severity: warning
+    annotations:
+      description: 'basierend auf dem Verlauf der letzten 72 Stunden wird der Mountpoint
+        {{ $labels.mountpoint }} in den naechsten 72h voll sein: {{ $labels.instance_id
+        }} tagged as: {{ $labels.instance_name_tag }}'
+      summary: PreditciveHostMountpointSpace
+
+  - alert: HostMountpointSpace
+    expr:  node_filesystem_avail_bytes{fstype!="tmpfs",fstype!="nfs4",fstype!="ufs"} < 1
+    for: 5m
+    labels:
+      severity: critical
+    annotations:
+      description: 'Festplatte voll im Mountpoint {{ $labels.mountpoint }}'
+      summary: HostMountpointSpace
+
+  # warning swap
+  - alert: NodeSwapUsageHigh
+    expr:  (((node_memory_SwapTotal - node_memory_SwapFree) / node_memory_SwapTotal) * 100) > 50 or (((node_memory_SwapTotal_bytes - node_memory_SwapFree_bytes) / node_memory_SwapTotal_bytes) * 100) > 50
+    for: 30m
+    labels:
+      severity: critical
+    annotations:
+      description: 'Linux Node Swap Disk Usage > 50% on {{ $labels.instance}} / {{ $labels.instance }}", wenn ein host swap space hat und der länger als 30m zu über 50% benutzt wird: {{ $value }}%\n  LABELS: {{ $labels }}'
+      summary: "critical Swap Space Usage on {{ $labels.instance}} / {{ $labels.instance }}"
+
+  - alert: AptUpdatesPending
+    expr: apt_upgrades_pending > 0
+    for: 30m
+    labels:
+      severity: warning
+    annotations:
+      descriptions: The instance has updates pending
+      summary: Instance {{ $labels.instance }} has {{ $value }} critical updates pending
+
+  - alert: AptSecurityUpdatesPending
+    expr: apt_upgrades_pending{origin=~".*Security.*"} > 0
+    for: 30m
+    labels:
+      severity: critical
+    annotations:
+      descriptions: The instance has critical Security updates pending
+      summary: Instance {{ $labels.instance }} has {{ $value }} critical Security updates pending
+
+  - alert: RebootRequired
+    expr: node_reboot_required == 1
+    for: 1h
+    labels:
+      severity: critical
+    annotations:
+      description: The instance requires an reboot
+      summary: Host is running an outdated kernel
+
+  - alert: HighMemoryPressure
+    expr: instance:node_memory_available:ratio * 100 < 5
+    for: 1m
+    labels:
+      severity: critical
+    annotations:
+      description: The node is under heavy memory pressure. The available memory is under 5% and there is a high rate of major page faults.
+      title: Node is under heavy memory pressure
+      value: Available memory {{ $value | printf "%.2f" }}%
+
+  - alert: OutOfMemory
+    expr: (node_memory_MemFree + node_memory_Cached + node_memory_Buffers) / node_memory_MemTotal * 100 < 10
+    for: 30m
+    labels:
+      severity: warning
+    annotations:
+      summary: "Out of memory ({{ $labels.instance}} /  {{ $labels.instance }})"
+      description: "Node memory is filling up (< 10% left)\n  VALUE = {{ $value }}\n  LABELS: {{ $labels }}"
+
+  - alert: UnusualNetworkThroughputOut
+    expr: sum by (domain,hostname) (irate(node_network_transmit_bytes[2m])) / 1024 / 1024 > 100
+    for: 30m
+    labels:
+      severity: warning
+    annotations:
+      summary: "Unusual network throughput out ({{ $labels.instance}} / {{ $labels.instance }})"
+      description: "Host network interfaces are probably sending too much data (> 100 MB/s)\n  VALUE = {{ $value }}\n"
+
+
+  - alert: CpuLoad
+    expr: node_load15 / (count without (cpu, mode) (node_cpu_seconds_total{mode="system"})) > 2
+    for: 30m
+    labels:
+      severity: warning
+    annotations:
+      summary: "CPU load ({{ $labels.instance}} / {{ $labels.instance }})"
+      description: "CPU load (15m) is high\n  VALUE = {{ $value }}\n  LABELS: {{ $labels }}"
+
+  - alert: NodeHasSwap
+    expr: node_memory_SwapCached > 0
+    for: 30m
+    labels:
+      severity: warning
+    annotations:
+      summary: "Node has swap ({{ $labels.instance}} / {{ $labels.instance }})"
+      description: "Node has swap\n  VALUE = {{ $value }}\n  LABELS: {{ $labels }}"
+
+
+  - alert: HostCPUUtilisation
+    expr: '100 - (avg by (domain,hostname) (irate(node_cpu{mode="idle"}[5m])) * 100) > 70'
+    for: 20m
+    labels:
+      severity: warning
+    annotations:
+      description: |
+        High CPU utilisation detected, currently: {{ $value }}%
+      summary: CPU Utilisation Alert

@@ -1,38 +1,38 @@
 # keycloak
 
-- name: create installdir "{{ installdir }}"
+- name: create installdir "{{ keycloak_installdir }}"
   file:
     state: directory
-    path: "{{ installdir }}"
+    path: "{{ keycloak_installdir }}"
 
-- name: create installdir "{{ installdir }}/certs"
+- name: create installdir "{{ keycloak_installdir }}/certs"
   file:
     state: directory
-    path: "{{ installdir }}/certs"
+    path: "{{ keycloak_installdir }}/certs"
     owner: root
     group: root
     mode: '0600'
 
-- name: "generating a x509 TLS certificate for the web-admin ({{ installdir }}/certs/tls.crt) with subject {{ keycloak_certificate_subject }}"
-  ansible.builtin.command: 'openssl req -new -newkey rsa:4096 -days 36500 -nodes -x509 -subj "{{ keycloak_certificate_subject }}" -keyout {{ installdir }}/certs/tls.key -out {{ installdir }}/certs/tls.crt'
+- name: "generating a x509 TLS certificate for the web-admin ({{ keycloak_installdir }}/certs/tls.crt) with subject {{ keycloak_certificate_subject }}"
+  ansible.builtin.command: 'openssl req -new -newkey rsa:4096 -days 36500 -nodes -x509 -subj "{{ keycloak_certificate_subject }}" -keyout {{ keycloak_installdir }}/certs/tls.key -out {{ keycloak_installdir }}/certs/tls.crt'
   args:
-    chdir: "{{ installdir }}/certs"
-    creates: "{{ installdir }}/certs/tls.crt"
+    chdir: "{{ keycloak_installdir }}/certs"
+    creates: "{{ keycloak_installdir }}/certs/tls.crt"
 
 - name: set permissions of cert files to 600 root/root
   with_items:
-    - "{{ installdir }}/certs/tls.crt"
-    - "{{ installdir }}/certs/tls.key"
+    - "{{ keycloak_installdir }}/certs/tls.crt"
+    - "{{ keycloak_installdir }}/certs/tls.key"
   ansible.builtin.file:
     path: "{{ item }}"
     owner: root
     group: root
     mode: '600'
 
-- name: Template compose file to "{{ installdir }}/docker-compose.yml"
+- name: Template compose file to "{{ keycloak_installdir }}/docker-compose.yml"
   ansible.builtin.template:
     src: docker-compose.yml
-    dest: "{{ installdir }}/docker-compose.yml"
+    dest: "{{ keycloak_installdir }}/docker-compose.yml"
     owner: root
     group: root
     mode: '0600'
@@ -44,9 +44,9 @@
   changed_when: false
   ansible.builtin.shell: "docker network create {{ traefik_providers_docker_network }}"
 
-- name: Create and start services with compose file in "{{ installdir }}"
+- name: Create and start services with compose file in "{{ keycloak_installdir }}"
   changed_when: false
   ansible.builtin.shell:
     cmd: docker compose up -d --remove-orphans
-    chdir: "{{ installdir }}"
+    chdir: "{{ keycloak_installdir }}"
   register: compose_output

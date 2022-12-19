@@ -1,8 +1,15 @@
-installdir: /dockerstacks/traefik
-docker_image: traefik:latest
-bindip: 0.0.0.0
-bindip_metrics: 127.0.0.1
-
+traefik_installdir: /dockerstacks/traefik
+traefik_servicename: traefik
+traefik_docker_image: traefik:latest
+traefik_bindip: 0.0.0.0
+traefik_bindip_metrics: 127.0.0.1
+traefik_bindip_intern: 127.0.0.1
+traefik_bindport_web: 80
+traefik_bindport_websecure: 443
+traefik_bindport_webintern: 81
+traefik_bindport_webinternsecure: 444
+traefik_bindport_traefik: 8080
+traefik_letencrypt_enabled: false
 traefik_letencrypt_email: dummy@example.com
-
 traefik_providers_docker_network: traefik_proxy
+traefik_tls_options_default_strictsni: true

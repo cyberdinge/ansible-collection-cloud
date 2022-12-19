@@ -7,7 +7,7 @@
     labels:
       test: sdfjlskdfj
   register: output
-    
+
 - name: Create a basic network
   hetzner.hcloud.hcloud_network:
     api_token: "{{ api_token }}"

@@ -1,22 +1,28 @@
 ---
 version: "3"
 services:
-  {{ service_name }}:
-    image: "{{ docker_image_name }}:{{ docker_image_version }}"
+  {{ coredns_servicename }}:
+    image: "{{ coredns_docker_image_name }}:{{ coredns_docker_image_version }}"
     restart: always
     command: -conf /etc/coredns/Corefile
     volumes:
       - "${PWD}:/etc/coredns:ro"
     ports:
-      - "{{ bindip_udp }}:{{ bindport_udp }}:53/udp"
-      - "{{ bindip_tcp }}:{{ bindport_tcp }}:53/tcp"
-      - "{{ bindip_metrics }}:{{ bindport_metrics }}:9153/tcp"
+      - "{{ coredns_bindip_udp }}:{{ coredns_bindport_udp }}:53/udp"
+      - "{{ coredns_bindip_tcp }}:{{ coredns_bindport_tcp }}:53/tcp"
+      - "{{ coredns_bindip_metrics }}:{{ coredns_bindport_metrics }}:9153/tcp"
+    networks:
+      - metrics
+        
     labels:
-      io.prometheus.metrics.ip: "{{ bindip_metrics }}"
-      io.prometheus.metrics.port: "{{ bindport_metrics }}"
+      prometheus-job: coredns
+      prometheus-port: 9153
+      prometheus-path: /metrics
+      io.prometheus.metrics.ip: "{{ coredns_bindip_metrics }}"
+      io.prometheus.metrics.port: "{{ coredns_bindport_metrics }}"
       io.prometheus.metrics.path: "/metrics"
-    hostname: "{{ service_name }}.{{ inventory_hostname }}"
-    logging:
-      driver: syslog
-      options:
-        tag: "{{ service_name }}"
+    hostname: "{{ coredns_servicename }}.{{ inventory_hostname }}"
+
+networks:
+  metrics:
+    name: metrics_network

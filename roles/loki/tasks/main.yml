@@ -1,0 +1,40 @@
+---
+# tasks file for cyberdinge.loki
+
+- name: create installdir "{{ loki_installdir }}"
+  file:
+    state: directory
+    path: "{{ loki_installdir }}"
+
+- name: create installdir "{{ loki_installdir }}/config"
+  file:
+    state: directory
+    path: "{{ loki_installdir }}/config"
+
+- name: Template loki config in "{{ loki_installdir }}/config/local-config.yaml"
+  changed_when: false
+  ansible.builtin.template:
+    src: local-config.yaml
+    dest: "{{ loki_installdir }}/config/local-config.yaml"
+    owner: root
+    group: root
+    mode: '0660'
+    force: yes
+
+- name: Template compose file to "{{ loki_installdir }}/docker-compose.yml"
+  changed_when: false
+  ansible.builtin.template:
+    src: docker-compose.yml
+    dest: "{{ loki_installdir }}/docker-compose.yml"
+    owner: root
+    group: root
+    mode: '0600'
+    force: yes
+
+- name: Create and start loki with compose file in "{{ loki_installdir }}"
+  changed_when: false
+  ansible.builtin.shell:
+    cmd: docker compose up -d --remove-orphans
+    chdir: "{{ loki_installdir }}"
+  register: compose_output
+

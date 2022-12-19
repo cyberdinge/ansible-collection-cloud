@@ -3,9 +3,8 @@
 
 - name: install coturn via apt
   apt:
-    state: latest
-    name: 
-      - coturn
+    state: present
+    name: coturn
 
 - name: "generating a x509 TLS certificate for the web-admin (/etc/turnserver.*) with subject {{ coturn_certificate_subject }}"
   ansible.builtin.command: 'openssl req -new -newkey rsa:4096 -days 36500 -nodes -x509 -subj "{{ coturn_certificate_subject }}" -keyout /etc/turnserver.key -out /etc/turnserver.crt'
@@ -32,22 +31,22 @@
     path: /lib/systemd/system/coturn.service
     state: "present"
     regexp: '^ExecStart='
-    line: > 
+    line: >
       ExecStart=/usr/bin/turnserver -c /etc/turnserver.conf --pidfile=
-      --web-admin 
-      --web-admin-ip={{ coturn_webadmin_ip }} 
-      --web-admin-port={{ coturn_webadmin_port }} 
-      --cert=/etc/turnserver.crt 
+      --web-admin
+      --web-admin-ip={{ coturn_webadmin_ip }}
+      --web-admin-port={{ coturn_webadmin_port }}
+      --cert=/etc/turnserver.crt
       --pkey=/etc/turnserver.key
-      --listening-port={{ coturn_listening_port }} 
-      --tls-listening-port={{ coturn_tls_listening_port }} 
-      --min-port={{ coturn_relay_udp_port_min }} 
+      --listening-port={{ coturn_listening_port }}
+      --tls-listening-port={{ coturn_tls_listening_port }}
+      --min-port={{ coturn_relay_udp_port_min }}
       --max-port={{ coturn_relay_udp_port_max }}
-      --syslog 
+      --syslog
       --log-file={{ coturn_turnserver_logfile_path }}
       --verbose
       --server-name={{ coturn_realm }}
-      --fingerprint 
+      --fingerprint
       --lt-cred-mech
       --realm={{ coturn_realm }}
   register: coturn_config
@@ -67,13 +66,13 @@
   ansible.builtin.command: turnadmin --add-admin -u {{ coturn_admin_username }} -p {{ coturn_admin_password }}
 
 - name: systemctl daemon-reload (when systemd config changed)
-  when: coturn_config.changed == true
+  when: coturn_config.changed
   changed_when: false
   ansible.builtin.command: systemctl daemon-reload
 
 
 - name: Enable service coturn and ensure it is enabled and started and not masked (when systemd config changed)
-  when: coturn_config.changed == true
+  when: coturn_config.changed
   changed_when: false
   ansible.builtin.systemd:
     name: coturn

@@ -1,0 +1,4 @@
+opentalk_installdir: /dockerstacks/opentalk
+opentalk_servicename: opentalk
+opentalk_domain: "opentalk.{{ inventory_hostname }}.{{ project_domain }}"
+traefik_providers_docker_network: traefik_proxy
