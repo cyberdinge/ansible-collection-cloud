@@ -1,0 +1,13 @@
+---
+version: '3.5'
+services:
+  {{ grafana_servicename }}:
+    image: "{{ grafana_docker_image }}"
+    restart: always
+    volumes:
+    - "{{ grafana_installdir }}/config:/etc/grafana:rw"
+    - "{{ grafana_installdir }}/data:/var/lib/grafana:rw"
+    user: 0:0 # FIXME
+    ports:
+      - "{{ grafana_bindip_tcp }}:{{ grafana_bindport_tcp }}:3000/tcp"
+    hostname: "{{ grafana_servicename }}.{{ inventory_hostname }}"

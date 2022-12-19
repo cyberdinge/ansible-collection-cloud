@@ -1,0 +1,12 @@
+# TODO bring pihole down when installed
+- name: Create and start services with compose file in "{{ wireguardui_installdir }}"
+  changed_when: false
+  ansible.builtin.shell:
+    cmd: docker compose down
+    chdir: "{{ wireguardui_installdir }}"
+  register: compose_output
+
+- name: delete installdir "{{ wireguardui_installdir }}"
+  file:
+    state: absent
+    path: "{{ wireguardui_installdir }}"  

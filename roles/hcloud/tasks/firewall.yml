@@ -16,7 +16,7 @@
   hetzner.hcloud.hcloud_firewall:
     api_token: "{{ api_token }}"
     state: "{{ state }}"
-    name: class_stunturn 
+    name: class_stunturn
     rules:
     - direction: in
       protocol: tcp
@@ -78,9 +78,9 @@
   hetzner.hcloud.hcloud_firewall:
     api_token: "{{ api_token }}"
     state: "{{ state }}"
-    name: class_front 
+    name: class_front
     rules:
-    
+
     - direction: in
       protocol: tcp
       port: "53"
@@ -88,7 +88,7 @@
         - 0.0.0.0/0
         - ::/0
       description: allow dns tcp in
-    
+
     - direction: in
       protocol: udp
       port: "53"
@@ -96,7 +96,7 @@
         - 0.0.0.0/0
         - ::/0
       description: allow dns udp in
-    
+
     - direction: in
       protocol: tcp
       port: "80"
@@ -140,7 +140,7 @@
   hetzner.hcloud.hcloud_firewall:
     api_token: "{{ api_token }}"
     state: "{{ state }}"
-    name: class_admin 
+    name: class_admin
     rules:
     - direction: in
       protocol: tcp
@@ -170,7 +170,7 @@
   hetzner.hcloud.hcloud_firewall:
     api_token: "{{ api_token }}"
     state: "{{ state }}"
-    name: class_opentalk 
+    name: class_opentalk
     rules:
 
     - direction: in
@@ -217,7 +217,7 @@
   hetzner.hcloud.hcloud_firewall:
     api_token: "{{ api_token }}"
     state: "{{ state }}"
-    name: class_jitsi 
+    name: class_jitsi
     rules:
 
     - direction: in

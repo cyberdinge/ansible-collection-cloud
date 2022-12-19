@@ -1,0 +1,13 @@
+---
+version: '3.5'
+services:
+  {{ loki_servicename }}:
+    image: "{{ loki_docker_image }}"
+    restart: always
+    volumes:
+    - "{{ loki_installdir }}/config:/etc/loki:rw"
+    - "{{ loki_installdir }}/data:/loki:rw"
+    user: 0:0 # FIXME
+    ports:
+      - "{{ loki_bindip_tcp }}:{{ loki_bindport_tcp }}:3100/tcp"
+    hostname: "{{ loki_servicename }}.{{ inventory_hostname }}"

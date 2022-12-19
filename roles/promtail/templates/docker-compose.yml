@@ -1,16 +1,13 @@
 ---
 version: '3.5'
 services:
-  promtail:
-    image: "{{ docker_image }}"
+  {{ promtail_servicename }}:
+    image: "{{ promtail_docker_image }}"
     restart: always
     command: -config.file=/etc/promtail/promtail.yml
     volumes:
     - "/var/log:/var/log:ro"
-    - "{{ installdir }}/config:/etc/promtail:ro"
-    - "{{ installdir }}/data:/data:rw"
-    hostname: "promtail.{{ inventory_hostname }}"
-    logging:
-      driver: syslog
-      options:
-        tag: "promtail"
+    - "/var/run/docker.sock:/var/run/docker.sock:ro"
+    - "{{ promtail_installdir }}/config:/etc/promtail:ro"
+    - "{{ promtail_installdir }}/data:/data:rw"
+    hostname: "{{ promtail_servicename }}.{{ inventory_hostname }}"

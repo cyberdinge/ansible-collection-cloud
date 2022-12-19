@@ -1,0 +1,43 @@
+---
+version: '3.5'
+services:
+  {{ pihole_servicename }}:
+    image: "{{ pihole_docker_image }}"
+    restart: always
+    # For DHCP it is recommended to remove these ports and instead add: network_mode: "host"
+    ports:
+      - "{{ pihole_dns_listen_ip }}:{{ pihole_dns_listen_port }}:53/tcp"
+      - "{{ pihole_dns_listen_ip }}:{{ pihole_dns_listen_port }}:53/udp"
+    #  - "67:67/udp" # Only required if you are using Pi-hole as your DHCP server
+      - "{{ pihole_admin_listen_ip }}:{{ pihole_admin_listen_port }}:80/tcp"
+    environment:
+      TZ: '{{ pihole_timezone }}'
+      WEBPASSWORD: '{{ pihole_password }}'
+    # Volumes store your data between container upgrades
+    volumes:
+      - '${PWD}/data/etc-pihole:/etc/pihole'
+      - '${PWD}/data/etc-dnsmasq.d:/etc/dnsmasq.d'
+    #   https://github.com/pi-hole/docker-pi-hole#note-on-capabilities
+    # cap_add:
+    #   - NET_ADMIN # Required if you are using Pi-hole as your DHCP server, else not needed
+    labels:
+      - traefik.enable=true
+
+      - traefik.http.routers.{{ pihole_servicename }}.rule=Host(`{{ pihole_domain }}`)
+      - traefik.http.routers.{{ pihole_servicename }}.entrypoints=web
+      - traefik.http.routers.{{ pihole_servicename }}.service={{ pihole_servicename }}
+      - traefik.http.routers.{{ pihole_servicename }}s.rule=Host(`{{ pihole_domain }}`)
+      - traefik.http.routers.{{ pihole_servicename }}s.entrypoints=websecure
+      - traefik.http.routers.{{ pihole_servicename }}s.service={{ pihole_servicename }}
+      - traefik.http.routers.{{ pihole_servicename }}s.tls=true
+      - traefik.http.routers.{{ pihole_servicename }}s.tls.certresolver=letsencrypt
+
+      - traefik.http.services.{{ pihole_servicename }}.loadbalancer.server.port=80
+    networks:
+      - {{ traefik_providers_docker_network }}
+    hostname: "{{ pihole_domain }}"
+
+networks:
+  # network in dem traefik ist, damit dieser hier hin routen kann
+  {{ traefik_providers_docker_network }}:
+    external: true

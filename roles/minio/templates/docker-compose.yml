@@ -1,0 +1,23 @@
+---
+version: "3"
+services:
+  {{ minio_servicename }}:
+    image: {{ minio_docker_image_name }}:{{ minio_docker_image_version }}
+    restart: always
+    command: server /data --console-address ":9001"
+    volumes:
+      - "{{ minio_installdir }}/config:/config:ro"
+      - "{{ minio_installdir }}/data:/data:rw"
+    ports:
+      - "{{ minio_bindip_tcp }}:{{ minio_bindport_tcp }}:9000/tcp"
+      - "{{ minio_bindip_console_tcp }}:{{ minio_bindport_console_tcp }}:9001/tcp"
+    networks:
+      - metrics
+    hostname: "{{ minio_servicename }}.{{ inventory_hostname }}"
+    environment:
+      MINIO_ROOT_USER: {{ minio_root_user }}
+      MINIO_ROOT_PASSWORD: {{ minio_root_password }}
+      MINIO_PROMETHEUS_AUTH_TYPE: {{ minio_prometheus_auth_type }}
+networks:
+  metrics:
+    name: metrics_network

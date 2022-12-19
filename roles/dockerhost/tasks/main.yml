@@ -8,14 +8,14 @@
   when: "'docker' not in services"
   block:
     - name: install dependencies for docker repo
-      apt:
-        state: latest
+      ansible.builtin.apt:
+        state: present
         update_cache: yes
-        name: 
+        name:
           - gpg
 
     - name: create keyrings folder /etc/apt/keyrings/ if it not exists
-      file:
+      ansible.builtin.file:
         state: directory
         path: /etc/apt/keyrings/
         owner: root
@@ -37,9 +37,9 @@
 
     - name: install dependencies for docker repo
       apt:
-        state: latest
+        state: present
         update_cache: yes
-        name: 
+        name:
           - docker-ce
           - docker-ce-cli
           - containerd.io

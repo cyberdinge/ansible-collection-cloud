@@ -2,7 +2,7 @@
 # tasks file for cyberdinge.gnomedesktop
 - name: Install Gnome via apt
   apt:
-    state: latest
+    state: present
     name:
       - task-gnome-desktop
 
@@ -22,5 +22,3 @@
 - name: set current runlevel to 5 (runlevel5.target, graphical.target)
   command: "init 5"
   changed_when: false
-
-# TODO - include_tasks: xrdp.yml

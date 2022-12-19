@@ -1,8 +1,11 @@
-installdir: /dockerstacks/prometheus
-bindip_tcp: 127.0.0.1
-bindport_tcp: 9090
-storage_tsdb_retention_size: 1GB
-docker_image_name: prom/prometheus
-docker_image_version: latest
-federation_label_domain: example.com
-federation_label_collector: "{{ inventory_hostname }}"
+prometheus_installdir: /dockerstacks/prometheus
+prometheus_servicename: prometheus
+prometheus_bindip_tcp: 127.0.0.1
+prometheus_bindport_tcp: 9090
+prometheus_storage_tsdb_retention_size: 1GB
+prometheus_docker_image_name: prom/prometheus
+prometheus_docker_image_version: latest
+prometheus_global_external_labels:
+    hostname: "{{ inventory_hostname }}"
+    domain: "{{ project_domain }}"    
+    network: "{{ wireguard_network_name }}"

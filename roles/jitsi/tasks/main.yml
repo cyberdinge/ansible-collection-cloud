@@ -1,69 +1,69 @@
 # tasks file for cyberdinge.jitsi
 # https://jitsi.github.io/handbook/docs/devops-guide/devops-guide-docker
 
-- name: create installdir "{{ installdir }}"
+- name: create installdir "{{ jitsi_installdir }}"
   file:
     state: directory
-    path: "{{ installdir }}"
+    path: "{{ jitsi_installdir }}"
 
 # web
-- name: create installdir "{{ installdir }}/web"
+- name: create installdir "{{ jitsi_installdir }}/web"
   file:
     state: directory
-    path: "{{ installdir }}/web"
+    path: "{{ jitsi_installdir }}/web"
 
-- name: create installdir "{{ installdir }}/web/crontabs"
+- name: create installdir "{{ jitsi_installdir }}/web/crontabs"
   file:
     state: directory
-    path: "{{ installdir }}/web/crontabs"
+    path: "{{ jitsi_installdir }}/web/crontabs"
 
-- name: create installdir "{{ installdir }}/transcripts"
+- name: create installdir "{{ jitsi_installdir }}/transcripts"
   file:
     state: directory
-    path: "{{ installdir }}/transcripts"
+    path: "{{ jitsi_installdir }}/transcripts"
 
 # prosody
-- name: create installdir "{{ installdir }}/prosody"
+- name: create installdir "{{ jitsi_installdir }}/prosody"
   file:
     state: directory
-    path: "{{ installdir }}/prosody"
+    path: "{{ jitsi_installdir }}/prosody"
 
-- name: create installdir "{{ installdir }}/prosody/config"
+- name: create installdir "{{ jitsi_installdir }}/prosody/config"
   file:
     state: directory
-    path: "{{ installdir }}/prosody/config"
+    path: "{{ jitsi_installdir }}/prosody/config"
 
-- name: create installdir "{{ installdir }}/prosody/prosody-plugins-custom"
+- name: create installdir "{{ jitsi_installdir }}/prosody/prosody-plugins-custom"
   file:
     state: directory
-    path: "{{ installdir }}/prosody/prosody-plugins-custom"
+    path: "{{ jitsi_installdir }}/prosody/prosody-plugins-custom"
 
 # jicofo
-- name: create installdir "{{ installdir }}/jicofo"
+- name: create installdir "{{ jitsi_installdir }}/jicofo"
   file:
     state: directory
-    path: "{{ installdir }}/jicofo"
+    path: "{{ jitsi_installdir }}/jicofo"
 
 
 # jvb
-- name: create installdir "{{ installdir }}/jvb"
+- name: create installdir "{{ jitsi_installdir }}/jvb"
   file:
     state: directory
-    path: "{{ installdir }}/jvb"
+    path: "{{ jitsi_installdir }}/jvb"
 
-- name: Template .env file to "{{ installdir }}/.env"
+- name: Template .env file to "{{ jitsi_installdir }}/.env"
   ansible.builtin.template:
     src: environment.env.txt
-    dest: "{{ installdir }}/.env"
+    dest: "{{ jitsi_installdir }}/.env"
     owner: root
     group: root
     mode: '0600'
     force: yes
 
-- name: Template compose file to "{{ installdir }}/docker-compose.yml"
+- name: Template compose file to "{{ jitsi_installdir }}/docker-compose.yml"
   ansible.builtin.template:
     src: docker-compose.yml
-    dest: "{{ installdir }}/docker-compose.yml"
+    dest: "{{ jitsi_installdir }}/docker-compose.yml"
     owner: root
     group: root
     mode: '0600'
@@ -75,9 +75,9 @@
   changed_when: false
   ansible.builtin.shell: "docker network create {{ traefik_providers_docker_network }}"
 
-- name: Create and start services with compose file in "{{ installdir }}"
+- name: Create and start services with compose file in "{{ jitsi_installdir }}"
   changed_when: false
   ansible.builtin.shell:
     cmd: docker compose up -d --remove-orphans
-    chdir: "{{ installdir }}"
+    chdir: "{{ jitsi_installdir }}"
   register: compose_output

@@ -1,0 +1,5 @@
+- when: pihole_state == "present"
+  include_tasks: up.yml
+
+- when: pihole_state != "present"
+  include_tasks: down.yml

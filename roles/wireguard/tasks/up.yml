@@ -1,0 +1,75 @@
+---
+# tasks file for cyberdinge.wireguard
+
+- name: install wireguard via apt
+  ansible.builtin.apt:
+    state: present
+    name:
+      - wireguard
+
+- name: set permission of /etc/wireguard to 600
+  ansible.builtin.file:
+    state: directory
+    path: /etc/wireguard
+    owner: root
+    group: root
+    mode: '600'
+
+- name: Generate new private key (if it does not exists)
+  ansible.builtin.shell: "wg genkey > {{ wireguard_network_name }}_key.priv"
+  args:
+    chdir: /etc/wireguard/
+    creates: "/etc/wireguard/{{ wireguard_network_name }}_key.priv"
+  register: create_private_key_result
+
+- name: Generate new public key (if it does not exists)
+  ansible.builtin.shell: "wg pubkey < /etc/wireguard/{{ wireguard_network_name }}_key.priv > /etc/wireguard/{{ wireguard_network_name }}_key.pub"
+  args:
+    chdir: /etc/wireguard/
+    creates: "/etc/wireguard/{{ wireguard_network_name }}_key.pub"
+  register: create_public_key_result
+
+- name: Read private key
+  ansible.builtin.shell: "cat /etc/wireguard/{{ wireguard_network_name }}_key.priv"
+  register: privatekey
+
+# when reading the keys from a host witch does have keys, this will fail. so we ignore the errors
+- name: Read publickeys from peers of group "{{ wireguard_network_name }}"
+  with_items: "{{ groups[wireguard_network_name] }}"
+  ignore_errors: true
+  include_tasks: "read_publickey.yaml"
+
+- name: Templating network config file "/etc/wireguard/{{ wireguard_network_name }}.conf"
+  ansible.builtin.template:
+    src: server_config_file.conf
+    dest: "/etc/wireguard/{{ wireguard_network_name }}.conf"
+    owner: root
+    group: root
+    mode: '600'
+    force: yes
+
+- name: set permissions of files to 600 root/root
+  with_items:
+    - "/etc/wireguard/{{ wireguard_network_name }}_key.priv"
+    - "/etc/wireguard/{{ wireguard_network_name }}_key.pub"
+    - "/etc/wireguard/{{ wireguard_network_name }}.conf"
+  ansible.builtin.file:
+    path: "{{ item }}"
+    owner: root
+    group: root
+    mode: '600'
+
+- name: Enable service with systemctl
+  ansible.builtin.systemd:
+    name: "wg-quick@{{ wireguard_network_name }}.service"
+    enabled: yes
+    masked: no
+    state: restarted
+
+- name: add hostname of peers to /etc/hosts
+  with_items: "{{ groups[wireguard_network_name] }}"
+  ansible.builtin.lineinfile:
+    path: /etc/hosts
+    state: "present"
+    regexp: '^{{ hostvars[item].wireguard_address }}'
+    line: "{{ hostvars[item].wireguard_address }} {{ hostvars[item].inventory_hostname }}.{{ wireguard_network_name }}"

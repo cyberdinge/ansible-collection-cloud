@@ -1,3 +1,4 @@
+---
 # my global config
 global:
   scrape_interval: 15s # Set the scrape interval to every 15 seconds. Default is every 1 minute.
@@ -6,9 +7,11 @@ global:
  
   # The labels to add to any time series or alerts when communicating with
   # external systems (federation, remote storage, Alertmanager).
-  external_labels:
-    collector: '{{ federation_label_collector }}'
-    domain: '{{ federation_label_domain }}'
+  external_labels: 
+{% for key in prometheus_global_external_labels %}    {{ key }}: {{ prometheus_global_external_labels[key] }}
+{% endfor %}
+
+
 
 # Alertmanager configuration
 alerting:
@@ -19,8 +22,7 @@ alerting:
 
 # Load rules once and periodically evaluate them according to the global 'evaluation_interval'.
 rule_files:
-  # - "first_rules.yml"
-  # - "second_rules.yml"
+  - "/etc/prometheus/rules/*.yml"
 
 # A scrape configuration containing exactly one endpoint to scrape:
 # Here it's Prometheus itself.
@@ -28,32 +30,30 @@ scrape_configs:
   # The job name is added as a label `job=<job_name>` to any timeseries scraped from this config.
   - job_name: "prometheus"
     static_configs:
-      - targets: ["localhost:9090"]
+      - targets: ["{{ hostvars[inventory_hostname].wireguard_address }}:9090"]
 
-# scrape node_exporter of all wireguard hosts
-  - job_name: "node"
+# filesd 
+  - job_name: 'file_sd_configs'
+    metrics_path: '/metrics'
+    file_sd_configs:
+      - files:
+        -  "/etc/prometheus/scrapeconfig/*.yaml"
+        -  "/etc/prometheus/scrapeconfig/*.yml"
+        -  "/etc/prometheus/scrapeconfig/*.json"
+
+# federation
+  - job_name: 'federate'
+    scrape_interval: 15s
+    honor_labels: true
+    metrics_path: '/federate'
+    params:
+      'match[]':
+        - '{job="prometheus"}'
+        - '{__name__=~".*"}'
     static_configs:
       - targets:
-{% if "wireguard" in groups %}{% for host in groups["wireguard"] %}        - "{{ hostvars[host].wireguard_address }}:9100"
-{% endfor %}{% endif %}
-
-# scrape coredns of all class_front hosts
-  - job_name: "coredns"
-    static_configs:
-      - targets:
-{% if 'wireguard' in groups %}{% for host in groups["class_front"] %}        - "{{ hostvars[host].wireguard_address }}:9153"
-{% endfor %}{% endif %}
-
-# scrape traefik of all class_front hosts
-  - job_name: "traefik"
-    static_configs:
-      - targets:
-{% if 'wireguard' in groups %}{% for host in groups["class_front"] %}        - "{{ hostvars[host].wireguard_address }}:8080"
-{% endfor %}{% endif %}
-{% if 'wireguard' in groups %}{% for host in groups["class_opentalk"] %}        - "{{ hostvars[host].wireguard_address }}:8080"
-{% endfor %}{% endif %}
-{% if 'wireguard' in groups %}{% for host in groups["class_jitsi"] %}        - "{{ hostvars[host].wireguard_address }}:8080"
-{% endfor %}{% endif %}
-
-
+        - 'vm1.projectdemo:9090'
+        - 'vm2.projectdemo:9090'
+        - 'vm3.projectdemo:9090'
+ 
 # EOF

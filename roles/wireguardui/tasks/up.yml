@@ -1,0 +1,22 @@
+# pihole
+
+- name: create installdir "{{ wireguardui_installdir }}"
+  file:
+    state: directory
+    path: "{{ wireguardui_installdir }}"
+
+- name: Template compose file to "{{ wireguardui_installdir }}/docker-compose.yml"
+  ansible.builtin.template:
+    src: docker-compose.yml
+    dest: "{{ wireguardui_installdir }}/docker-compose.yml"
+    owner: root
+    group: root
+    mode: '0600'
+    force: yes
+
+- name: Create and start services with compose file in "{{ wireguardui_installdir }}"
+  changed_when: false
+  ansible.builtin.shell:
+    cmd: docker compose up -d --remove-orphans
+    chdir: "{{ wireguardui_installdir }}"
+  register: compose_output

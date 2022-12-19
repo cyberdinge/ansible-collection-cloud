@@ -1,0 +1,15 @@
+---
+groups:
+
+- name: traefik
+  rules:
+
+  - alert: IncomingHttpRequests401AuthDenied
+    expr: rate(traefik_service_requests_total{code=~"401"}[1m]) > 0.3
+    for: 5m
+    labels:
+      severity: warning
+    annotations:
+      description: "Es gibt viele (>0.3 Requests/pro Sekunde) eingehende HTTP Requests mit Statuscode 401 auf dem Service '$labels.service'. Evtl. ein Angriffsversuch. {{ $labels.hostname}} / {{ $labels.instance }}"
+      summary: "viele eingehende HTTP Requests mit ungültigen User/Passwort (Statuscode 401) {{ $labels.hostname}} / {{ $labels.instance }} "
+

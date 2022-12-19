@@ -1,0 +1,13 @@
+minio_installdir: /dockerstacks/minio
+minio_servicename: minio
+minio_bindip_tcp: 127.0.0.1
+minio_bindport_tcp: 9000
+minio_bindip_console_tcp: 127.0.0.1
+minio_bindport_console_tcp: 9001
+minio_docker_image_name: quay.io/minio/minio
+minio_docker_image_version: latest
+minio_root_user: minioadmin
+minio_root_password: minioadmin
+
+# https://min.io/docs/minio/linux/reference/minio-server/minio-server.html#metrics-and-logging
+minio_prometheus_auth_type: public

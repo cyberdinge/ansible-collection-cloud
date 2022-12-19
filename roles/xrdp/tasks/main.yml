@@ -1,0 +1,68 @@
+# current pversion of xrdp is 0.9.12-1.1 in bullseye
+# that version is buggy
+# - name: install xrdp via apt
+#   apt:
+#     state: present
+#     name: xrdp
+
+- name: FIXME download older xorgxrdp package xorgxrdp_0.2.15-1_amd64.deb
+  ansible.builtin.get_url:
+    url: https://snapshot.debian.org/archive/debian/20210302T032219Z/pool/main/x/xorgxrdp/xorgxrdp_0.2.15-1_amd64.deb
+    dest: /tmp/xorgxrdp_0.2.15-1_amd64.deb
+
+- name: FIXME download older xrdp package xrdp_0.9.15-1_amd64.deb
+  ansible.builtin.get_url:
+    url: https://snapshot.debian.org/archive/debian/20210302T032219Z/pool/main/x/xrdp/xrdp_0.9.15-1_amd64.deb
+    dest: /tmp/xrdp_0.9.15-1_amd64.deb
+
+- name: FIXME install older verion of xorgxrdp 
+  ansible.builtin.command: apt install ./xorgxrdp_0.2.15-1_amd64.deb
+  args:
+    chdir: /tmp/    
+
+- name: FIXME install older verion of xrdp 
+  ansible.builtin.command: apt install ./xrdp_0.9.15-1_amd64.deb
+  args:
+    chdir: /tmp/    
+
+- name: Template xrdp.ini file to "/etc/xrdp/xrdp.ini"
+  ansible.builtin.template:
+    src: xrdp.ini
+    dest: /etc/xrdp/xrdp.ini
+    owner: root
+    group: root
+    mode: 644
+    force: yes
+
+# xRDP uses the /etc/ssl/private/ssl-cert-snakeoil.key file which belongs to the ssl-cert group. 
+# As such we need to add the xRDP user to that group:
+- name: add users to group 'ssl-cert'
+  with_items: "{{ users }}"
+  ansible.builtin.user:
+    name: "{{ item.name }}"
+    append: yes
+    group: ssl-cert
+    state: "{{ item.state }}"
+
+- name: add users to group 'xrdp'
+  with_items: "{{ users }}"
+  ansible.builtin.user:
+    name: "{{ item.name }}"
+    append: yes
+    group: xrdp
+    state: "{{ item.state }}"    
+
+- name: add users to group 'tty'
+  with_items: "{{ users }}"
+  ansible.builtin.user:
+    name: "{{ item.name }}"
+    append: yes
+    group: tty
+    state: "{{ item.state }}"    
+
+- name: Enable service xrdp and ensure it is enabled and restarted and not masked
+  ansible.builtin.systemd:
+    name: xrdp
+    enabled: yes
+    masked: no
+    state: started

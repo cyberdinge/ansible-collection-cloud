@@ -1,8 +1,9 @@
-installdir: /dockerstacks/keycloak
-docker_image: quay.io/keycloak/keycloak:20.0.1
+keycloak_installdir: /dockerstacks/keycloak
+keycloak_docker_image: quay.io/keycloak/keycloak:20.0.1
+keycloak_servicename: keycloak
 traefik_providers_docker_network: traefik_proxy
-keycloak_domain: accounts.example.com 
-keycloak_domain_admin: accounts.example.com 
+keycloak_domain: "accounts.{{ inventory_hostname }}.{{ project_domain }}"
+keycloak_domain_admin: "accountadmin.{{ inventory_hostname }}.{{ project_domain }}"
 keycloak_frontend_url: "https://{{ keycloak_domain }}"
 
 # innerhalb des containers

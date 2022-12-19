@@ -1,10 +1,11 @@
-installdir: /dockerstacks/jitsi
+jitsi_installdir: /dockerstacks/jitsi
+jitsi_servicename: jitsi
 traefik_providers_docker_network: traefik_proxy
 
 jitsi_image_version: stable-8044-1
 jitsi_restart: always
 
-jitsi_domain: jitsi.example.com
+jitsi_domain: "jitsi.{{ inventory_hostname }}.{{ project_domain }}"
 
 jitsi_etherpad_enabled: false
 jitsi_etherpad_public_url: "https://etherpad.{{ jitsi_domain }}/p/"

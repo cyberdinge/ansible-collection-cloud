@@ -1,81 +1,81 @@
 ---
 # tasks file for cyberdinge.traefik
 
-- name: create installdir "{{ installdir }}"
+- name: create installdir "{{ traefik_installdir }}"
   file:
     state: directory
-    path: "{{ installdir }}"
+    path: "{{ traefik_installdir }}"
 
-- name: create installdir "{{ installdir }}/data"
+- name: create installdir "{{ traefik_installdir }}/data"
   file:
     state: directory
-    path: "{{ installdir }}/data"
+    path: "{{ traefik_installdir }}/data"
 
-- name: create installdir "{{ installdir }}/etc"
+- name: create installdir "{{ traefik_installdir }}/etc"
   file:
     state: directory
-    path: "{{ installdir }}/etc"
+    path: "{{ traefik_installdir }}/etc"
 
 
-- name: create installdir "{{ installdir }}/etc/static"
+- name: create installdir "{{ traefik_installdir }}/etc/static"
   file:
     state: directory
-    path: "{{ installdir }}/etc/static"
+    path: "{{ traefik_installdir }}/etc/static"
 
 - name: create default cert
   block:
 
-    - name: Create private key (RSA, 4096 bits) in "{{ installdir }}/etc/static/server_default.key"
+    - name: Create private key (RSA, 4096 bits) in "{{ traefik_installdir }}/etc/static/server_default.key"
       community.crypto.openssl_privatekey:
-        path: "{{ installdir }}/etc/static/server_default.key"
+        path: "{{ traefik_installdir }}/etc/static/server_default.key"
       tags: self signed default
 
-    - name: Create simple self-signed certificate to "{{ installdir }}/etc/static/server_default.cert"
+    - name: Create simple self-signed certificate to "{{ traefik_installdir }}/etc/static/server_default.cert"
       community.crypto.x509_certificate:
-        path: "{{ installdir }}/etc/static/server_default.cert"
-        privatekey_path: "{{ installdir }}/etc/static/server_default.key"
+        path: "{{ traefik_installdir }}/etc/static/server_default.cert"
+        privatekey_path: "{{ traefik_installdir }}/etc/static/server_default.key"
         provider: selfsigned
 
-- name: ensure file "{{ installdir }}/data/acme.json" exists
+- name: ensure file "{{ traefik_installdir }}/data/acme.json" exists
   copy:
     content: ""
-    dest: "{{ installdir }}/data/acme.json"
+    dest: "{{ traefik_installdir }}/data/acme.json"
     force: no
     group: root
     owner: root
     mode: 0600
 
-- name: change permissions of "{{ installdir }}/data/acme.json" to 0600
+- name: change permissions of "{{ traefik_installdir }}/data/acme.json" to 0600
   ansible.builtin.file:
-    dest: "{{ installdir }}/data/acme.json"
+    dest: "{{ traefik_installdir }}/data/acme.json"
     owner: root
     group: root
     mode: '0600'
     force: yes
 
-- name: Template static tls config to "{{ installdir }}/etc/static/tls.yml"
+- name: Template static tls config to "{{ traefik_installdir }}/etc/static/tls.yml"
   ansible.builtin.template:
     src: static_tls.yml
-    dest: "{{ installdir }}/etc/static/tls.yml"
+    dest: "{{ traefik_installdir }}/etc/static/tls.yml"
     owner: root
     group: root
     mode: '0600'
     force: yes
 
-- name: Template traefik.yml to "{{ installdir }}/etc/traefik.yml"
+- name: Template traefik.yml to "{{ traefik_installdir }}/etc/traefik.yml"
   ansible.builtin.template:
     src: traefik.yml
-    dest: "{{ installdir }}/etc/traefik.yml"
+    dest: "{{ traefik_installdir }}/etc/traefik.yml"
     owner: root
     group: root
     mode: '0600'
     force: yes
 
 
-- name: Template compose file to "{{ installdir }}/docker-compose.yml"
+- name: Template compose file to "{{ traefik_installdir }}/docker-compose.yml"
   ansible.builtin.template:
     src: docker-compose.yml
-    dest: "{{ installdir }}/docker-compose.yml"
+    dest: "{{ traefik_installdir }}/docker-compose.yml"
     owner: root
     group: root
     mode: '0600'
@@ -87,8 +87,24 @@
   changed_when: false
   ansible.builtin.shell: "docker network create {{ traefik_providers_docker_network }}"
 
-- name: Create and start services with compose file in "{{ installdir }}"
+- name: Create and start services with compose file in "{{ traefik_installdir }}"
   ansible.builtin.shell:
     cmd: docker compose up -d --remove-orphans
-    chdir: "{{ installdir }}"
+    chdir: "{{ traefik_installdir }}"
   register: compose_output
+
+
+- name: set facts to notify prometheus about the scrape target
+  ansible.builtin.set_fact:
+    scrape_target_state: present
+    scrape_target_job: traefik
+    scrape_target_hostname: "{{ inventory_hostname }}"
+    scrape_target_domain: "{{ project_domain }}"    
+    scrape_target_network: "{{ wireguard_network_name }}"
+    scrape_target_url: "{{ hostvars[inventory_hostname].traefik_bindip_metrics }}:{{ traefik_bindport_traefik }}"
+  changed_when: true # handler running when somethingchanged
+  notify:
+    - "prometheus - add static scrape file"  
+
+- name: Flush handlers
+  meta: flush_handlers
