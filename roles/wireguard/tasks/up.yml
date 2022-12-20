@@ -47,7 +47,7 @@
     group: root
     mode: '600'
     force: yes
-
+  register: wireguard_config
 - name: set permissions of files to 600 root/root
   with_items:
     - "/etc/wireguard/{{ wireguard_network_name }}_key.priv"
@@ -60,6 +60,7 @@
     mode: '600'
 
 - name: Enable service with systemctl
+  when: wireguard_config.changed
   ansible.builtin.systemd:
     name: "wg-quick@{{ wireguard_network_name }}.service"
     enabled: yes
