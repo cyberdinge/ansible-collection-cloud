@@ -67,3 +67,15 @@
   ansible.builtin.shell:
     cmd: docker compose exec -it prometheus kill -1 1
     chdir: "{{ prometheus_installdir }}"
+
+
+- name: set facts to notify grafana about the datasource
+  ansible.builtin.set_fact:
+    datasource_state: present
+    datasource_url: "http://{{ prometheus_bindip_tcp }}:{{ prometheus_bindport_tcp }}"
+  changed_when: true # handler running when somethingchanged
+  notify:
+    - "grafana - add prometheus datasource provisioner"
+
+- name: Flush handlers
+  meta: flush_handlers

@@ -11,11 +11,21 @@
     state: directory
     path: "{{ grafana_installdir }}/config"
 
+- name: create installdir "{{ grafana_installdir }}/config/provisioning"
+  file:
+    state: directory
+    path: "{{ grafana_installdir }}/config/provisioning"
+
+- name: create installdir "{{ grafana_installdir }}/config/provisioning/datasources"
+  file:
+    state: directory
+    path: "{{ grafana_installdir }}/config/provisioning/datasources"
+
 - name: Template grafana config in "{{ grafana_installdir }}/config/grafana.ini"
   changed_when: false
   ansible.builtin.template:
     src: grafana.ini
-    dest: "{{ grafana_installdir }}/config/grafana.ini"
+    dest: "{{ grafana_installdir }}/config/defaults.ini"
     owner: root
     group: root
     mode: '0660'

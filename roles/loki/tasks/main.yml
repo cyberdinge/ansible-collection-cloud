@@ -38,3 +38,13 @@
     chdir: "{{ loki_installdir }}"
   register: compose_output
 
+- name: set facts to notify grafana about the datasource
+  ansible.builtin.set_fact:
+    datasource_state: present
+    datasource_url: "http://{{ loki_bindip_tcp }}:{{ loki_bindport_tcp }}"
+  changed_when: true # handler running when somethingchanged
+  notify:
+    - "grafana - add loki datasource provisioner"
+
+- name: Flush handlers
+  meta: flush_handlers
