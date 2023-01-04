@@ -1,0 +1,53 @@
+# handlers file for cyberdinge.grafana
+
+
+# TODO this fails when the node calling is not a grafana host.
+# must be limited to grafana hosts
+- name: "grafana - add loki datasource provisioner"
+  ansible.builtin.copy:
+    dest: "{{ grafana_installdir }}/config/provisioning/datasources/{{ inventory_hostname }}_loki.yml"
+    owner: root
+    group: root
+    mode: '0660'
+    force: yes
+    content: |
+      ---
+      apiVersion: 1
+      datasources:
+        - name: Loki
+          type: loki
+          access: proxy
+          url: {{ datasource_url }}
+          jsonData:
+            maxLines: 1000
+
+- name: "grafana - add prometheus datasource provisioner"
+  ansible.builtin.copy:
+    dest: "{{ grafana_installdir }}/config/provisioning/datasources/{{ inventory_hostname }}_prometheus.yml"
+    owner: root
+    group: root
+    mode: '0660'
+    force: yes
+    content: |
+      ---
+      apiVersion: 1
+
+      datasources:
+        - name: Prometheus
+          type: prometheus
+          # Access mode - proxy (server in the UI) or direct (browser in the UI).
+          access: proxy
+          url: {{ datasource_url }}
+          # jsonData:
+          #   httpMethod: POST
+          #   exemplarTraceIdDestinations:
+          #     # Field with internal link pointing to data source in Grafana.
+          #     # datasourceUid value can be anything, but it should be unique across all defined data source uids.
+          #     - datasourceUid: my_jaeger_uid
+          #       name: traceID
+
+          #     # Field with external link.
+          #     - name: traceID
+          #       url: 'http://localhost:3000/explore?orgId=1&left=%5B%22now-1h%22,%22now%22,%22Jaeger%22,%7B%22query%22:%22$${__value.raw}%22%7D%5D'
+
+

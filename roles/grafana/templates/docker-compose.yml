@@ -5,7 +5,7 @@ services:
     image: "{{ grafana_docker_image }}"
     restart: always
     volumes:
-    - "{{ grafana_installdir }}/config:/etc/grafana:rw"
+    - "{{ grafana_installdir }}/config/provisioning:/etc/grafana/provisioning:rw"
     - "{{ grafana_installdir }}/data:/var/lib/grafana:rw"
     user: 0:0 # FIXME
     ports:

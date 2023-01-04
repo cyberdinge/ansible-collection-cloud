@@ -11,11 +11,21 @@
     state: directory
     path: "{{ grafana_installdir }}/config"
 
+- name: create installdir "{{ grafana_installdir }}/config/provisioning"
+  file:
+    state: directory
+    path: "{{ grafana_installdir }}/config/provisioning"
+
+- name: create installdir "{{ grafana_installdir }}/config/provisioning/datasources"
+  file:
+    state: directory
+    path: "{{ grafana_installdir }}/config/provisioning/datasources"
+
 - name: Template grafana config in "{{ grafana_installdir }}/config/grafana.ini"
   changed_when: false
   ansible.builtin.template:
     src: grafana.ini
-    dest: "{{ grafana_installdir }}/config/grafana.ini"
+    dest: "{{ grafana_installdir }}/config/defaults.ini"
     owner: root
     group: root
     mode: '0660'
@@ -38,17 +48,17 @@
     chdir: "{{ grafana_installdir }}"
   register: compose_output
 
-- name: set facts to notify prometheus about the scrape target
-  ansible.builtin.set_fact:
-    scrape_target_state: present
-    scrape_target_job: grafana
-    scrape_target_hostname: "{{ inventory_hostname }}"
-    scrape_target_domain: "{{ project_domain }}"    
-    scrape_target_network: "{{ wireguard_network_name }}"
-    scrape_target_url: "{{ grafana_bindip_tcp }}:{{ grafana_bindport_tcp }}"
-  changed_when: true # handler running when somethingchanged
-  notify:
-    - "prometheus - add static scrape file"  
+# - name: set facts to notify prometheus about the scrape target
+#   ansible.builtin.set_fact:
+#     scrape_target_state: present
+#     scrape_target_job: grafana
+#     scrape_target_hostname: "{{ inventory_hostname }}"
+#     scrape_target_domain: "{{ project_domain }}"    
+#     scrape_target_network: "{{ wireguard_network_name }}"
+#     scrape_target_url: "{{ grafana_bindip_tcp }}:{{ grafana_bindport_tcp }}"
+#   changed_when: true # handler running when somethingchanged
+#   notify:
+#     - "prometheus - add static scrape file"  
 
-- name: Flush handlers
-  meta: flush_handlers  
+# - name: Flush handlers
+#   meta: flush_handlers  

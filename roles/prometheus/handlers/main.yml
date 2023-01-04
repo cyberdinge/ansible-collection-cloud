@@ -1,6 +1,10 @@
 # handlers file for cyberdinge.prometheus
 
+
+# TODO this fails when the node calling is not a prometheus host.
+# must be limited to prometheus hosts
 - name: "prometheus - add static scrape file"
+#  ignore_errors: true #TODO and then this will not be needed anymore
   ansible.builtin.copy:
     dest: "{{ prometheus_installdir }}/config/scrapeconfig/{{ inventory_hostname}}_{{ scrape_target_job }}.yml"
     owner: root
