@@ -20,17 +20,17 @@
     masked: no
     state: restarted
 
-- name: set facts to notify prometheus about the scrape target
-  ansible.builtin.set_fact:
-    scrape_target_state: present
-    scrape_target_job: node_exporter
-    scrape_target_hostname: "{{ inventory_hostname }}"
-    scrape_target_domain: "{{ project_domain }}"    
-    scrape_target_network: "{{ wireguard_network_name }}"
-    scrape_target_url: "{{ hostvars[inventory_hostname].wireguard_address }}:{{ nodeexporter_bindport }}"
-  changed_when: true # handler running when somethingchanged
-  notify:
-    - "prometheus - add static scrape file"
+# - name: set facts to notify prometheus about the scrape target
+#   ansible.builtin.set_fact:
+#     scrape_target_state: present
+#     scrape_target_job: node_exporter
+#     scrape_target_hostname: "{{ inventory_hostname }}"
+#     scrape_target_domain: "{{ project_domain }}"    
+#     scrape_target_network: "{{ wireguard_network_name }}"
+#     scrape_target_url: "{{ hostvars[inventory_hostname].wireguard_address }}:{{ nodeexporter_bindport }}"
+#   changed_when: true # handler running when somethingchanged
+#   notify:
+#     - "prometheus - add static scrape file"
 
-- name: Flush handlers
-  meta: flush_handlers
+# - name: Flush handlers
+#   meta: flush_handlers
