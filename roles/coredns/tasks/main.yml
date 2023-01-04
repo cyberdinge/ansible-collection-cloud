@@ -44,17 +44,17 @@
   register: compose_output
 
 
-- name: set facts to notify prometheus about the scrape target
-  ansible.builtin.set_fact:
-    scrape_target_state: present
-    scrape_target_job: coredns
-    scrape_target_hostname: "{{ inventory_hostname }}"
-    scrape_target_domain: "{{ project_domain }}"    
-    scrape_target_network: "{{ wireguard_network_name }}"
-    scrape_target_url: "{{ coredns_bindip_metrics }}:{{ coredns_bindport_metrics }}"
-  changed_when: true # handler running when somethingchanged
-  notify:
-    - "prometheus - add static scrape file"  
+# - name: set facts to notify prometheus about the scrape target
+#   ansible.builtin.set_fact:
+#     scrape_target_state: present
+#     scrape_target_job: coredns
+#     scrape_target_hostname: "{{ inventory_hostname }}"
+#     scrape_target_domain: "{{ project_domain }}"    
+#     scrape_target_network: "{{ wireguard_network_name }}"
+#     scrape_target_url: "{{ coredns_bindip_metrics }}:{{ coredns_bindport_metrics }}"
+#   changed_when: true # handler running when somethingchanged
+#   notify:
+#     - "prometheus - add static scrape file"  
 
-- name: Flush handlers
-  meta: flush_handlers  
+# - name: Flush handlers
+#   meta: flush_handlers  
