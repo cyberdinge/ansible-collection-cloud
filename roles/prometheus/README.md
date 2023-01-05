@@ -37,3 +37,10 @@ https://relabeler.promlabs.com/
 promtool check config /etc/prometheus/prometheus.yml
 docker compose exec prometheus promtool check config /etc/prometheus/prometheus.yml
 ```
+
+
+### delete a series
+
+``` BASH
+curl -X POST -g 'http://localhost:9090/api/v1/admin/tsdb/delete_series?match[]={instance="sbcode.net:9100"}'
+```
